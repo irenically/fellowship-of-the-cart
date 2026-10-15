@@ -31,6 +31,9 @@ begin
         and ((table_name in ('household_sessions','household_invites') and column_name='expires_at')
           or (table_name='households' and column_name='locked_until'))));
   for migration in select * from cart_manual_migrations order by version loop
+    raise notice 'Historical migration %: %', migration.version, case when migration.applied then 'present' else 'pending' end;
+  end loop;
+  for migration in select * from cart_manual_migrations order by version loop
     if not migration.applied then seen_pending := true;
     elsif seen_pending then
       raise exception 'Database changes do not match a complete migration prefix. Stop deployment and inspect the schema before repairing history.';
