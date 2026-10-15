@@ -2,7 +2,7 @@
 
 **One list to rule them all.** A tiny grocery list for everyday household adventures.
 
-React, strict TypeScript, Vite with its Oxc/Rolldown toolchain, plain CSS, and Supabase. No accounts, navigation, or unnecessary ceremony.
+React, strict TypeScript, Vite with its Oxc/Rolldown toolchain, Material UI with Emotion, and Supabase. No accounts, navigation, or unnecessary ceremony. The shared MUI theme lives in `src/styles/theme.tsx`; plain CSS handles the responsive page layout and watercolor artwork.
 
 ## Run locally
 

@@ -53,42 +53,6 @@ body::before {
   background-position: center;
   background-repeat: no-repeat;
 }
-button,
-input,
-select {
-  font: inherit;
-}
-button,
-input,
-select {
-  min-height: 46px;
-}
-button {
-  cursor: pointer;
-  border: 0;
-  border-radius: 8px;
-  background: var(--green);
-  color: white;
-  padding: 0 20px;
-  font-weight: 600;
-}
-button:disabled {
-  cursor: default;
-  opacity: 0.55;
-}
-input,
-select {
-  width: 100%;
-  border: 1px solid #cbd2c6;
-  border-radius: 7px;
-  background: #fffefa;
-  color: #263e32;
-  padding: 10px 12px;
-  caret-color: var(--green);
-}
-input::placeholder {
-  color: #747c70;
-}
 :focus-visible {
   outline: 3px solid #aa8534;
   outline-offset: 3px;
@@ -156,6 +120,7 @@ h2 {
   font-size: 29px;
   margin: 0;
   font-weight: 500;
+  line-height: 1.25;
 }
 .tagline {
   font-family: Lora, Georgia, serif;
@@ -196,22 +161,14 @@ h2 {
   flex: 1;
   min-width: 0;
 }
-.field-error {
-  display: block;
-  margin: 6px 12px 0;
-  color: #a12d23;
-  font-size: 12px;
-  line-height: 1.5;
-}
-input[aria-invalid="true"] {
-  border-color: #b83c30;
-  outline-color: #b83c30;
-  box-shadow: 0 0 0 1px #b83c30;
+.add-field .MuiOutlinedInput-root {
+  border-radius: 28px;
+  background: #f9f9f2;
 }
 .add-form input {
   min-width: 0;
-  min-height: 54px;
-  background: #f9f9f2;
+  height: 54px;
+  box-sizing: border-box;
   background-image: url("/assets/Watercolor Three-Leaf Botanical Sprig.png");
   background-repeat: no-repeat;
   background-position: 14px center;
@@ -234,10 +191,6 @@ input[aria-invalid="true"] {
   width: 23px;
   height: 23px;
 }
-.add-form button:not(:disabled):hover,
-.save-button:not(:disabled):hover {
-  background: #3b6449;
-}
 .add-form input[readonly] {
   color: var(--muted);
   cursor: progress;
@@ -247,28 +200,6 @@ input[aria-invalid="true"] {
   font-size: 13px;
   color: #354333;
   margin: 0 0 8px;
-}
-progress {
-  display: block;
-  appearance: none;
-  width: 100%;
-  height: 9px;
-  border: 0;
-  border-radius: 20px;
-  background: #ebe4d2;
-  accent-color: var(--green);
-  overflow: hidden;
-}
-progress::-webkit-progress-bar {
-  background: #ebe4d2;
-}
-progress::-webkit-progress-value {
-  background: linear-gradient(90deg, #52734b, #7c9462);
-  border-radius: 20px;
-}
-progress::-moz-progress-bar {
-  background: linear-gradient(90deg, #52734b, #7c9462);
-  border-radius: 20px;
 }
 .item-group {
   margin-top: 12px;
@@ -325,15 +256,10 @@ ul {
   min-width: 0;
 }
 .check-target {
-  display: grid;
-  place-items: center;
   flex: 0 0 36px;
-  width: 36px;
-  min-height: 44px;
-  cursor: pointer;
 }
-.check {
-  appearance: none;
+.checkbox-mark {
+  display: block;
   width: 28px;
   height: 28px;
   min-height: 28px;
@@ -344,12 +270,12 @@ ul {
   cursor: pointer;
   margin: 0;
 }
-.check:checked {
+.check-target.Mui-checked .checkbox-mark {
   background: var(--green);
   border-color: var(--green);
   color: #ffffff;
 }
-.check::after {
+.checkbox-mark::after {
   content: "";
   display: block;
   width: 7px;
@@ -360,12 +286,12 @@ ul {
   margin: 5px auto 0;
 }
 @media (hover: hover) {
-  .check-target:hover .check:not(:disabled) {
+  .check-target:not(.Mui-disabled):hover .checkbox-mark {
     border-color: #507b3f;
     color: #507b3f;
     background: #edf3e5;
   }
-  .check-target:hover .check:checked:not(:disabled) {
+  .check-target.Mui-checked:not(.Mui-disabled):hover .checkbox-mark {
     background: #3f7045;
     border-color: #6c9654;
     color: #ffffff;
@@ -399,11 +325,6 @@ ul {
   gap: 2px;
 }
 .icon-button {
-  display: inline-grid;
-  place-items: center;
-  min-height: 44px;
-  width: 44px;
-  padding: 0;
   flex-shrink: 0;
 }
 .home-button.is-home {
@@ -416,18 +337,6 @@ ul {
 .purchased .item-title > span {
   text-decoration: line-through;
   color: var(--completed-text);
-}
-.quiet {
-  background: none;
-  color: var(--muted);
-  padding: 5px 10px;
-  font-size: 12px;
-}
-.quiet:hover {
-  background: #edf0e5;
-}
-.quiet:not(:disabled):hover {
-  color: var(--green);
 }
 .delete:not(:disabled):hover {
   color: #8a2e22;
@@ -444,11 +353,9 @@ ul {
   gap: 8px;
   align-items: center;
 }
-.editor label {
-  font-size: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.editor .MuiFormControl-root,
+.editor .MuiInputBase-root {
+  min-width: 0;
 }
 .editor .error {
   grid-column: 1/-1;
@@ -461,13 +368,7 @@ ul {
 .editor select {
   min-width: 0;
 }
-.error {
-  background: #fcf0e9;
-  color: #8c3623;
-  padding: 12px;
-  border-radius: 7px;
-  font-size: 13px;
-  line-height: 1.6;
+.MuiAlert-root {
   overflow-wrap: anywhere;
 }
 .empty {
@@ -700,9 +601,6 @@ ul {
   }
   .item:has(.editor) {
     align-items: flex-start;
-  }
-  .editor label {
-    min-width: 0;
   }
   .editor input,
   .editor select {

@@ -1,8 +1,18 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  render as renderUI,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import type { ReactElement } from "react";
+import { AppTheme } from "../../styles/theme";
 import userEvent from "@testing-library/user-event";
 import { localRepository } from "../../lib/repository";
 import { App } from "./App";
+function render(element: ReactElement) {
+  return renderUI(<AppTheme>{element}</AppTheme>);
+}
 beforeEach(() => localStorage.clear());
 afterEach(cleanup);
 it("shows empty-name validation under the input and clears it while typing", async () => {
@@ -15,7 +25,9 @@ it("shows empty-name validation under the input and clears it while typing", asy
   await waitFor(() => expect(input.disabled).toBe(false));
   await user.click(screen.getByRole("button", { name: "Add item" }));
   expect(input.getAttribute("aria-invalid")).toBe("true");
-  expect(screen.getByRole("alert").id).toBe("new-item-error");
+  expect(input.getAttribute("aria-describedby")).toBe(
+    screen.getByRole("alert").id,
+  );
   expect(screen.queryByRole("button", { name: "Refresh list" })).toBeNull();
   await user.type(input, " ");
   expect(input.getAttribute("aria-invalid")).toBe("true");

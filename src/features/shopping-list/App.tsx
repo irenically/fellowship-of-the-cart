@@ -3,6 +3,12 @@ import { createRepository, type Repository } from "../../lib/repository";
 import { sortItems, validateInput, type Item } from "./model";
 import { ItemRow } from "./ItemRow";
 import { Icon } from "../../components/Icon";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import LinearProgress from "@mui/material/LinearProgress";
+import Paper from "@mui/material/Paper";
+import TextField from "@mui/material/TextField";
 function message(cause: unknown) {
   return cause instanceof Error
     ? cause.message
@@ -124,7 +130,10 @@ export function App({ repository: supplied }: { repository?: Repository }) {
           </h1>
           <p className="tagline">One list to rule them all.</p>
         </header>
-        <section
+        <Paper
+          component="section"
+          variant="outlined"
+          elevation={0}
           className="quest"
           aria-labelledby="quest-heading"
           aria-busy={loading || !!busy}
@@ -141,9 +150,9 @@ export function App({ repository: supplied }: { repository?: Repository }) {
               >
                 {gathered} of {items.length} provisions gathered
               </p>
-              <progress
-                value={gathered}
-                max={Math.max(items.length, 1)}
+              <LinearProgress
+                variant="determinate"
+                value={items.length ? (gathered / items.length) * 100 : 0}
                 aria-labelledby="shopping-progress-label"
               />
             </div>
@@ -153,54 +162,57 @@ export function App({ repository: supplied }: { repository?: Repository }) {
               Item name
             </label>
             <div className="add-field">
-              <input
+              <TextField
                 id="new-item"
-                ref={input}
+                inputRef={input}
                 value={name}
-                readOnly={busy === "add"}
+                error={!!nameError}
+                helperText={nameError || undefined}
+                slotProps={{
+                  htmlInput: { readOnly: busy === "add" },
+                  formHelperText: { role: nameError ? "alert" : undefined },
+                }}
                 onChange={(event) => {
                   setName(event.target.value);
                   if (event.target.value.trim()) setNameError("");
                 }}
-                aria-invalid={!!nameError}
-                aria-describedby={nameError ? "new-item-error" : undefined}
                 placeholder="What shall we acquire?"
                 autoComplete="off"
                 disabled={!repository || loading}
               />
-              {nameError && (
-                <p className="field-error" id="new-item-error" role="alert">
-                  {nameError}
-                </p>
-              )}
             </div>
-            <button
+            <IconButton
+              className="add-button"
               type="submit"
               aria-label={busy === "add" ? "Adding item" : "Add item"}
               title="Add item (Enter)"
               disabled={!!busy || !repository || loading}
             >
               <Icon name="plus" />
-            </button>
+            </IconButton>
           </form>
           <span className="sr-only" role="status">
             {busy ? "Saving changes…" : ""}
           </span>
           {(error || loadError) && (
-            <div className="error" role="alert">
-              {error || loadError}{" "}
-              {repository && (
-                <button
-                  className="quiet"
-                  onClick={() => {
-                    setError("");
-                    void refresh();
-                  }}
-                >
-                  Refresh list
-                </button>
-              )}
-            </div>
+            <Alert
+              severity="error"
+              icon={false}
+              action={
+                repository ? (
+                  <Button
+                    onClick={() => {
+                      setError("");
+                      void refresh();
+                    }}
+                  >
+                    Refresh list
+                  </Button>
+                ) : undefined
+              }
+            >
+              {error || loadError}
+            </Alert>
           )}
           {loading && repository ? (
             <p className="empty" role="status">
@@ -295,8 +307,7 @@ export function App({ repository: supplied }: { repository?: Repository }) {
               {gathered > 0 && (
                 <div className="list-footer">
                   <span>A little lighter, a little more prepared.</span>
-                  <button
-                    className="quiet"
+                  <Button
                     disabled={!!busy}
                     onClick={() => {
                       if (
@@ -306,12 +317,12 @@ export function App({ repository: supplied }: { repository?: Repository }) {
                     }}
                   >
                     Clear gathered
-                  </button>
+                  </Button>
                 </div>
               )}
             </>
           )}
-        </section>
+        </Paper>
         <p className="household-note">
           For the household. For the second breakfast.
         </p>

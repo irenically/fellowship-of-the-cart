@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "../../components/Icon";
+import Checkbox from "@mui/material/Checkbox";
+import IconButton from "@mui/material/IconButton";
+import TextField from "@mui/material/TextField";
+import Select from "@mui/material/Select";
+import Alert from "@mui/material/Alert";
 import {
   formatQuantity,
   parseQuantity,
@@ -66,16 +71,19 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
   }
   return (
     <li className={`item ${item.is_purchased ? "purchased" : ""}`}>
-      <label className="check-target">
-        <input
-          className="check"
-          type="checkbox"
-          aria-label={`Mark ${item.name} as ${item.is_purchased ? "needed" : "purchased"}`}
-          checked={item.is_purchased}
-          disabled={busy || editing}
-          onChange={toggle}
-        />
-      </label>
+      <Checkbox
+        className="check-target"
+        slotProps={{
+          input: {
+            "aria-label": `Mark ${item.name} as ${item.is_purchased ? "needed" : "purchased"}`,
+          },
+        }}
+        icon={<span className="checkbox-mark" />}
+        checkedIcon={<span className="checkbox-mark" />}
+        checked={item.is_purchased}
+        disabled={busy || editing}
+        onChange={toggle}
+      />
       {editing ? (
         <form
           className="editor"
@@ -87,58 +95,47 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
             }
           }}
         >
-          <label className="edit-name">
-            <span className="sr-only">Item name</span>
-            <input
-              autoFocus
-              value={name}
-              aria-invalid={!!nameError}
-              aria-describedby={nameError ? `name-error-${item.id}` : undefined}
-              aria-label="Item name"
-              onChange={(event) => {
-                setName(event.target.value);
-                if (event.target.value.trim()) setNameError("");
-              }}
-              disabled={busy}
-            />
-            {nameError && (
-              <span
-                className="field-error"
-                id={`name-error-${item.id}`}
-                role="alert"
-              >
-                {nameError}
-              </span>
-            )}
-          </label>
-          <label>
-            <span className="sr-only">Quantity</span>
-            <input
-              inputMode="decimal"
-              aria-label="Quantity"
-              placeholder="Qty"
-              value={quantity}
-              onChange={(event) => setQuantity(event.target.value)}
-              disabled={busy}
-            />
-          </label>
-          <label>
-            <span className="sr-only">Unit</span>
-            <select
-              value={unit}
-              aria-label="Unit"
-              onChange={(event) => setUnit(event.target.value as Unit)}
-              disabled={busy}
-            >
-              {Object.entries(units).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <TextField
+            className="edit-name"
+            autoFocus
+            value={name}
+            error={!!nameError}
+            helperText={nameError || undefined}
+            slotProps={{
+              htmlInput: { "aria-label": "Item name" },
+              formHelperText: { role: nameError ? "alert" : undefined },
+            }}
+            onChange={(event) => {
+              setName(event.target.value);
+              if (event.target.value.trim()) setNameError("");
+            }}
+            disabled={busy}
+          />
+          <TextField
+            slotProps={{
+              htmlInput: { inputMode: "decimal", "aria-label": "Quantity" },
+            }}
+            placeholder="Qty"
+            value={quantity}
+            onChange={(event) => setQuantity(event.target.value)}
+            disabled={busy}
+          />
+          <Select
+            native
+            size="small"
+            value={unit}
+            inputProps={{ "aria-label": "Unit" }}
+            onChange={(event) => setUnit(event.target.value as Unit)}
+            disabled={busy}
+          >
+            {Object.entries(units).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </Select>
           <div className="edit-actions">
-            <button
+            <IconButton
               disabled={busy}
               className="icon-button quiet"
               type="button"
@@ -147,8 +144,8 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
               onClick={finishEditing}
             >
               <Icon name="close" />
-            </button>
-            <button
+            </IconButton>
+            <IconButton
               disabled={busy}
               type="submit"
               className="icon-button save-button"
@@ -156,12 +153,12 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
               title="Save (Enter)"
             >
               <Icon name="save" />
-            </button>
+            </IconButton>
           </div>
           {error && (
-            <p className="error" role="alert">
+            <Alert className="error" severity="error" icon={false}>
               {error}
-            </p>
+            </Alert>
           )}
         </form>
       ) : (
@@ -176,7 +173,7 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
               : units[item.unit]}
           </span>
           <div className="row-actions">
-            <button
+            <IconButton
               className="icon-button quiet"
               ref={editTrigger}
               onClick={begin}
@@ -185,8 +182,8 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
               title="Edit"
             >
               <Icon name="edit" />
-            </button>
-            <button
+            </IconButton>
+            <IconButton
               className={`icon-button quiet home-button ${item.is_purchased ? "is-home" : ""}`}
               onClick={toggle}
               disabled={busy}
@@ -201,16 +198,17 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
               }
             >
               <Icon name="home" />
-            </button>
-            <button
+            </IconButton>
+            <IconButton
               className="icon-button delete quiet"
+              color="error"
               aria-label={`Delete ${item.name}`}
               onClick={remove}
               disabled={busy}
               title="Delete"
             >
               <Icon name="trash" />
-            </button>
+            </IconButton>
           </div>
         </>
       )}
