@@ -21,7 +21,6 @@ export function App({ repository: supplied }: { repository?: Repository }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(configuration.error);
   const [loadError, setLoadError] = useState("");
-  const [connected, setConnected] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const lock = useRef(false);
   const [name, setName] = useState("");
@@ -48,7 +47,7 @@ export function App({ repository: supplied }: { repository?: Repository }) {
     const reload = () => {
       void refresh();
     };
-    const unsubscribe = repository.subscribe(reload, setConnected);
+    const unsubscribe = repository.subscribe(reload);
     reload();
     const timer = window.setInterval(reload, 15000);
     window.addEventListener("focus", reload);
@@ -125,19 +124,6 @@ export function App({ repository: supplied }: { repository?: Repository }) {
         </h1>
         <p className="tagline">One list to rule them all.</p>
       </header>
-      <div
-        className={`connection ${repository?.mode === "local" ? "local" : ""}`}
-        role="status"
-      >
-        <span aria-hidden="true">●</span>{" "}
-        {repository?.mode === "local"
-          ? "Local-only mode · saved in this browser, not shared across devices"
-          : repository
-            ? connected
-              ? "Shared list · live updates"
-              : "Connecting live updates · refreshing every 15 seconds"
-            : "Configuration needs attention"}
-      </div>
       <section className="quest" aria-labelledby="quest-heading">
         <div className="quest-header">
           <div>
@@ -315,7 +301,9 @@ export function App({ repository: supplied }: { repository?: Repository }) {
         <p className="footer-copyright">© {new Date().getFullYear()} The Fellowship of the Cart</p>
         <nav aria-label="Footer links">
           <a href="https://irenically.github.io/dungeons-and-drumsticks/">Dungeons &amp; Drumsticks</a>
-          <a href="https://github.com/irenically/fellowship-of-the-cart">GitHub</a>
+          <a className="github-link" href="https://github.com/irenically/fellowship-of-the-cart" aria-label="View source on GitHub" title="View source on GitHub">
+            <span className="github-icon" aria-hidden="true" />
+          </a>
         </nav>
         <p className="footer-note">Forged with love, fueled by snacks.</p>
       </div>

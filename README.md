@@ -16,7 +16,7 @@ npm run dev
 
 On Windows PowerShell, use `Copy-Item .env.example .env`. If script execution is restricted, use `npm.cmd` instead of `npm`.
 
-Leave both environment variables empty for **local-only mode**. A banner identifies this mode: data persists only in this browser; it does not synchronize across devices. Tabs on the same origin receive storage updates. Storage errors are reported. Local data is not automatically uploaded when switching to Supabase.
+Leave both environment variables empty for **local-only mode**: data persists only in this browser; it does not synchronize across devices. Connection-mode banners are intentionally omitted from the UI. Tabs on the same origin receive storage updates. Storage errors are reported. Local data is not automatically uploaded when switching to Supabase.
 
 ## Enable the shared list
 
@@ -63,6 +63,6 @@ Enable Settings → Pages → Source → **GitHub Actions**. With authenticated 
 gh api --method POST repos/irenically/fellowship-of-the-cart/pages -f build_type=workflow
 ```
 
-If Pages already exists, use `--method PUT`. Push to main or manually run “Check and deploy to GitHub Pages”, then inspect the workflow deployment URL. Without Supabase variables, deployment works in explicitly labelled local-only mode.
+If Pages already exists, use `--method PUT`. Push to main or manually run “Check and deploy to GitHub Pages”, then inspect the workflow deployment URL. Without Supabase variables, deployment uses local-only storage and will not synchronize across devices.
 
 The SQL and two-client Supabase synchronization require a real project and must be verified after configuration: open the site in two browsers, add/edit/toggle/delete from each and check the other updates, then interrupt one connection and verify recovery. Never commit `.env` or privileged credentials.

@@ -91,7 +91,7 @@ main {
 }
 .brand {
   text-align: center;
-  padding: 0 0 8px;
+  padding: 0 0 28px;
 }
 .brand .tagline {
   margin-bottom: 0;
@@ -161,20 +161,6 @@ h2 {
 }
 .mobile-break {
   display: none;
-}
-.connection {
-  font-size: 12px;
-  text-align: center;
-  color: #466951;
-  margin-bottom: 28px;
-  line-height: 1.7;
-}
-.connection span {
-  font-size: 8px;
-  margin-right: 5px;
-}
-.connection.local {
-  color: #806323;
 }
 .quest {
   background: rgba(255, 253, 247, 0.96);
@@ -557,6 +543,16 @@ ul {
   color: #65551f;
   text-decoration-color: currentColor;
 }
+.github-link {
+  justify-content: center;
+  min-width: 44px;
+}
+.github-icon {
+  width: 24px;
+  height: 24px;
+  background-color: currentColor;
+  mask: url("/assets/brand-github.svg") center / contain no-repeat;
+}
 .footer-note {
   font-style: italic;
   text-align: right;
@@ -651,9 +647,6 @@ ul {
   }
   .list-footer > span {
     max-width: 145px;
-  }
-  .connection {
-    font-size: 10px;
   }
   .item {
     gap: 6px;

@@ -12,10 +12,7 @@ export interface Repository {
   toggle(id: string, purchased: boolean): Promise<void>;
   remove(id: string): Promise<void>;
   clear(): Promise<void>;
-  subscribe(
-    refresh: () => void,
-    status: (connected: boolean) => void,
-  ): () => void;
+  subscribe(refresh: () => void): () => void;
 }
 const storageKey = "fellowship-cart:v1";
 export function localRepository(storage: Storage = localStorage): Repository {
@@ -84,13 +81,12 @@ export function localRepository(storage: Storage = localStorage): Repository {
     async clear() {
       write(read().filter((item) => !item.is_purchased));
     },
-    subscribe(refresh, status) {
+    subscribe(refresh) {
       const onStorage = (event: StorageEvent) => {
         if (event.key === storageKey || event.key === null) refresh();
       };
       window.addEventListener("storage", onStorage);
       window.addEventListener("cart-change", refresh);
-      status(true);
       return () => {
         window.removeEventListener("storage", onStorage);
         window.removeEventListener("cart-change", refresh);
@@ -162,7 +158,7 @@ export function createRepository(): Repository {
         client.from("shopping_items").delete().eq("is_purchased", true),
       );
     },
-    subscribe(refresh, status) {
+    subscribe(refresh) {
       const channel = client
         .channel("shopping-list")
         .on(
@@ -171,9 +167,7 @@ export function createRepository(): Repository {
           refresh,
         )
         .subscribe((state) => {
-          const connected = state === "SUBSCRIBED";
-          status(connected);
-          if (connected) refresh();
+          if (state === "SUBSCRIBED") refresh();
         });
       return () => {
         void client.removeChannel(channel);
