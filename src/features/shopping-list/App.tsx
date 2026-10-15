@@ -169,7 +169,7 @@ export function App({ repository: supplied }: { repository?: Repository }) {
                 error={!!nameError}
                 helperText={nameError || undefined}
                 slotProps={{
-                  htmlInput: { readOnly: busy === "add" },
+                  htmlInput: { readOnly: busy === "add", enterKeyHint: "done" },
                   formHelperText: { role: nameError ? "alert" : undefined },
                 }}
                 onChange={(event) => {
@@ -259,18 +259,33 @@ export function App({ repository: supplied }: { repository?: Repository }) {
                       {purchased && remaining > 0 && (
                         <div className="botanical-divider" aria-hidden="true" />
                       )}
-                      <h3 className="group-heading">
-                        <img
-                          className="botanical-sprig"
-                          src={`${import.meta.env.BASE_URL}assets/Watercolor Three-Leaf Botanical Sprig.png`}
-                          alt=""
-                          aria-hidden="true"
-                          width="34"
-                          height="40"
-                        />
-                        {purchased ? "Gathered Provisions" : "To Gather"}{" "}
-                        <span>{group.length}</span>
-                      </h3>
+                      <div className="group-toolbar">
+                        <h3 className="group-heading">
+                          <img
+                            className="botanical-sprig"
+                            src={`${import.meta.env.BASE_URL}assets/Watercolor Three-Leaf Botanical Sprig.png`}
+                            alt=""
+                            aria-hidden="true"
+                            width="34"
+                            height="40"
+                          />
+                          {purchased ? "Gathered Provisions" : "To Gather"}
+                        </h3>
+                        {purchased && (
+                          <Button
+                            className="clear-gathered"
+                            variant="outlined"
+                            startIcon={<Icon name="trash" />}
+                            disabled={!!busy}
+                            onClick={() => {
+                              if (window.confirm(`Clear all ${gathered} purchased items?`))
+                                void act("clear", () => repository!.clear());
+                            }}
+                          >
+                            Clear gathered
+                          </Button>
+                        )}
+                      </div>
                       <ul>
                         {group.map((item) => (
                           <ItemRow
@@ -307,17 +322,6 @@ export function App({ repository: supplied }: { repository?: Repository }) {
               {gathered > 0 && (
                 <div className="list-footer">
                   <span>A little lighter, a little more prepared.</span>
-                  <Button
-                    disabled={!!busy}
-                    onClick={() => {
-                      if (
-                        window.confirm(`Clear all ${gathered} purchased items?`)
-                      )
-                        void act("clear", () => repository!.clear());
-                    }}
-                  >
-                    Clear gathered
-                  </Button>
                 </div>
               )}
             </>

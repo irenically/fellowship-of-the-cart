@@ -1,5 +1,5 @@
 export const units = {
-  piece: "piece",
+  piece: "pcs",
   g: "g",
   kg: "kg",
   ml: "ml",

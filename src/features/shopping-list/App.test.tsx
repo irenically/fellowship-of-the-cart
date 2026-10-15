@@ -70,7 +70,7 @@ it("adds with Enter, refocuses, cancels edits, saves comma quantities and comple
   expect((input as HTMLInputElement).value).toBe("");
   expect(document.activeElement).toBe(input);
   await user.click(screen.getByText("Milk", { exact: true }));
-  await user.click(screen.getByText("1 piece", { exact: true }));
+  await user.click(screen.getByText("1 pcs", { exact: true }));
   expect(screen.queryByRole("button", { name: "Save" })).toBeNull();
   await user.click(screen.getByRole("button", { name: "Edit Milk" }));
   await user.clear(

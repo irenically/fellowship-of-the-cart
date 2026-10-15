@@ -26,6 +26,7 @@ export const theme = createTheme({
       defaultProps: { disableRipple: true },
       styleOverrides: {
         root: {
+          touchAction: "manipulation",
           "&.Mui-focusVisible": {
             outline: "3px solid #aa8534",
             outlineOffset: 3,
@@ -85,14 +86,16 @@ export const theme = createTheme({
     MuiCheckbox: {
       styleOverrides: {
         root: {
-          padding: 4,
-          width: 36,
+          padding: 8,
+          width: 44,
           minHeight: 44,
           "&.Mui-disabled": { opacity: 0.55 },
         },
       },
     },
-    MuiPaper: { styleOverrides: { root: { borderRadius: 15, borderColor: "#d8cbaa" } } },
+    MuiPaper: {
+      styleOverrides: { root: { borderRadius: 15, borderColor: "#d8cbaa" } },
+    },
     MuiAlert: {
       styleOverrides: {
         root: ({ ownerState }) => ({

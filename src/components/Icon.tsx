@@ -1,4 +1,4 @@
-type IconName = "edit" | "home" | "trash" | "save" | "close" | "plus";
+type IconName = "edit" | "home" | "trash" | "save" | "close" | "plus" | "more";
 const paths: Record<IconName, string> = {
   edit: "m16 3 5 5-12 12-6 1 1-6L16 3ZM13 6l5 5",
   home: "m3 10 9-7 9 7v11h-6v-7H9v7H3V10Z",
@@ -6,6 +6,7 @@ const paths: Record<IconName, string> = {
   save: "M19 21H5a2 2 0 0 1-2-2V3h14l4 4v12a2 2 0 0 1-2 2ZM7 3v6h10V3M7 21v-8h10v8",
   close: "m6 6 12 12M6 18 18 6",
   plus: "M12 5v14M5 12h14",
+  more: "M13 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM13 12a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM13 19a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z",
 };
 export function Icon({ name }: { name: IconName }) {
   return (

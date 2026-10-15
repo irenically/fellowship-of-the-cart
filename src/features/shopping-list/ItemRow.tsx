@@ -5,6 +5,8 @@ import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
 import Select from "@mui/material/Select";
 import Alert from "@mui/material/Alert";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import {
   formatQuantity,
   parseQuantity,
@@ -23,6 +25,7 @@ interface Props {
 }
 export function ItemRow({ item, busy, save, toggle, remove }: Props) {
   const [editing, setEditing] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [name, setName] = useState(item.name);
   const [quantity, setQuantity] = useState(String(item.quantity));
   const [unit, setUnit] = useState(item.unit);
@@ -102,7 +105,7 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
             error={!!nameError}
             helperText={nameError || undefined}
             slotProps={{
-              htmlInput: { "aria-label": "Item name" },
+              htmlInput: { "aria-label": "Item name", enterKeyHint: "done" },
               formHelperText: { role: nameError ? "alert" : undefined },
             }}
             onChange={(event) => {
@@ -113,7 +116,11 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
           />
           <TextField
             slotProps={{
-              htmlInput: { inputMode: "decimal", "aria-label": "Quantity" },
+              htmlInput: {
+                inputMode: "decimal",
+                "aria-label": "Quantity",
+                enterKeyHint: "done",
+              },
             }}
             placeholder="Qty"
             value={quantity}
@@ -163,52 +170,91 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
         </form>
       ) : (
         <>
-          <span className="item-title">
+          <span className="item-title" title={item.name}>
             <span>{item.name}</span>
           </span>
-          <span className="item-quantity">
-            {formatQuantity(item.quantity)}{" "}
-            {item.unit === "piece" && item.quantity !== 1
-              ? "pieces"
-              : units[item.unit]}
-          </span>
-          <div className="row-actions">
-            <IconButton
-              className="icon-button quiet"
-              ref={editTrigger}
-              onClick={begin}
-              disabled={busy}
-              aria-label={`Edit ${item.name}`}
-              title="Edit"
+          <div className="item-details">
+            <span className="item-quantity">
+              {formatQuantity(item.quantity)}{" "}
+              {units[item.unit]}
+            </span>
+            <div className="row-actions">
+              <IconButton
+                className="icon-button quiet"
+                ref={editTrigger}
+                onClick={begin}
+                disabled={busy}
+                aria-label={`Edit ${item.name}`}
+                title="Edit"
+              >
+                <Icon name="edit" />
+              </IconButton>
+              <IconButton
+                className={`icon-button quiet home-button desktop-row-action ${item.is_purchased ? "is-home" : ""}`}
+                onClick={toggle}
+                disabled={busy}
+                aria-pressed={item.is_purchased}
+                aria-label={
+                  item.is_purchased
+                    ? `Return ${item.name} to shopping`
+                    : `Already have ${item.name} at home`
+                }
+                title={
+                  item.is_purchased ? "Return to shopping" : "Already at home"
+                }
+              >
+                <Icon name="home" />
+              </IconButton>
+              <IconButton
+                className="icon-button delete quiet desktop-row-action"
+                color="error"
+                aria-label={`Delete ${item.name}`}
+                onClick={remove}
+                disabled={busy}
+                title="Delete"
+              >
+                <Icon name="trash" />
+              </IconButton>
+              <IconButton
+                className="icon-button quiet mobile-more"
+                aria-label={`More actions for ${item.name}`}
+                aria-haspopup="menu"
+                aria-expanded={!!menuAnchor}
+                aria-controls={menuAnchor ? `actions-${item.id}` : undefined}
+                disabled={busy}
+                onClick={(event) => setMenuAnchor(event.currentTarget)}
+              >
+                <Icon name="more" />
+              </IconButton>
+            </div>
+            <Menu
+              id={`actions-${item.id}`}
+              anchorEl={menuAnchor}
+              open={!!menuAnchor}
+              onClose={() => setMenuAnchor(null)}
             >
-              <Icon name="edit" />
-            </IconButton>
-            <IconButton
-              className={`icon-button quiet home-button ${item.is_purchased ? "is-home" : ""}`}
-              onClick={toggle}
-              disabled={busy}
-              aria-pressed={item.is_purchased}
-              aria-label={
-                item.is_purchased
-                  ? `Return ${item.name} to shopping`
-                  : `Already have ${item.name} at home`
-              }
-              title={
-                item.is_purchased ? "Return to shopping" : "Already at home"
-              }
-            >
-              <Icon name="home" />
-            </IconButton>
-            <IconButton
-              className="icon-button delete quiet"
-              color="error"
-              aria-label={`Delete ${item.name}`}
-              onClick={remove}
-              disabled={busy}
-              title="Delete"
-            >
-              <Icon name="trash" />
-            </IconButton>
+              <MenuItem
+                sx={{ minHeight: 44, gap: 1 }}
+                disabled={busy}
+                onClick={() => {
+                  setMenuAnchor(null);
+                  toggle();
+                }}
+              >
+                <Icon name="home" />
+                {item.is_purchased ? "Return to shopping" : "Already at home"}
+              </MenuItem>
+              <MenuItem
+                sx={{ minHeight: 44, gap: 1, color: "error.main" }}
+                disabled={busy}
+                onClick={() => {
+                  setMenuAnchor(null);
+                  remove();
+                }}
+              >
+                <Icon name="trash" /> Delete
+              </MenuItem>
+            </Menu>
           </div>
         </>
       )}
