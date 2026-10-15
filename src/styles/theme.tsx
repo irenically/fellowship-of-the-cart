@@ -4,6 +4,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 export const theme = createTheme({
   palette: {
+    mode: "light",
     primary: {
       main: "#264b3b",
       dark: "#173b28",
@@ -123,7 +124,7 @@ export const theme = createTheme({
 export function AppTheme({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
+      <CssBaseline enableColorScheme />
       {children}
     </ThemeProvider>
   );
