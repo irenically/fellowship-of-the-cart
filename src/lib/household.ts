@@ -1,9 +1,16 @@
-import { createClient } from "@supabase/supabase-js";
+﻿import { createClient } from "@supabase/supabase-js";
 
 export interface Household {
   id: string;
   name: string;
+  slug: string | null;
+  needsPassword: boolean;
   secret: string;
+}
+export interface HouseholdInput {
+  name: string;
+  slug: string;
+  password: string;
 }
 export const householdStorageKey = "fellowship-household:v1";
 const secretPattern = /^[a-f0-9]{64}$/;
@@ -13,19 +20,38 @@ export function newHouseholdSecret(): string {
     byte.toString(16).padStart(2, "0"),
   ).join("");
 }
-
-export function householdLink(
-  secret: string,
-  base = window.location.href,
-): string {
-  if (!secretPattern.test(secret))
-    throw new Error("This household link is invalid.");
-  const url = new URL(base);
-  url.search = "";
-  url.hash = `household=${secret}`;
-  return url.href;
+export function householdId(name: string): string {
+  if (!name.trim()) return "";
+  const slug = name
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 64)
+    .replace(/-$/, "");
+  return slug.length >= 3 ? slug : slug ? `${slug}-home` : "household";
+}
+export function validateHouseholdPassword(password: string) {
+  if (Array.from(password).length < 8 || !password.trim())
+    throw new Error("Use a password with at least 8 characters.");
+  if (new TextEncoder().encode(password).length > 72 || password.includes("\0"))
+    throw new Error(
+      "This password is too long. Use up to 72 bytes (fewer for emoji or accented characters).",
+    );
+}
+function validateId(slug: string) {
+  if (
+    slug.length < 3 ||
+    slug.length > 64 ||
+    !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)
+  )
+    throw new Error(
+      "Use 3–64 lowercase letters, numbers, and single hyphens for the household ID.",
+    );
 }
 
+// Legacy links are retained only to let existing households set a password.
 export function secretFromLink(
   link: string,
   base = window.location.href,
@@ -34,7 +60,7 @@ export function secretFromLink(
   try {
     url = new URL(link.trim());
   } catch {
-    throw new Error("Paste the full household invite link.");
+    throw new Error("This household link is invalid.");
   }
   const app = new URL(base);
   const secret = new URLSearchParams(url.hash.slice(1)).get("household");
@@ -44,22 +70,18 @@ export function secretFromLink(
     !secret ||
     !secretPattern.test(secret)
   )
-    throw new Error("This is not a valid household link for this app.");
+    throw new Error("This household link is invalid.");
   return secret;
 }
-
 export function initialHouseholdSecret(): string | null {
-  const params = new URLSearchParams(window.location.hash.slice(1));
-  if (params.has("household")) return secretFromLink(window.location.href);
+  if (new URLSearchParams(window.location.hash.slice(1)).has("household"))
+    return secretFromLink(window.location.href);
   const stored = localStorage.getItem(householdStorageKey);
   if (!stored) return null;
   if (!secretPattern.test(stored))
-    throw new Error(
-      "The saved household link is invalid. Open your invite link again.",
-    );
+    throw new Error("Your saved session is invalid. Sign in again.");
   return stored;
 }
-
 export function sharedConfiguration() {
   const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
   const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as
@@ -71,12 +93,11 @@ export function sharedConfiguration() {
     );
   return { url, key };
 }
-
 export function householdClient(secret: string) {
   const config = sharedConfiguration();
   if (!config) throw new Error("Shared storage is not configured.");
   if (!secretPattern.test(secret))
-    throw new Error("This household link is invalid.");
+    throw new Error("Your session is invalid. Sign in again.");
   return createClient(config.url, config.key, {
     global: { headers: { "x-household-key": secret } },
     auth: {
@@ -86,45 +107,135 @@ export function householdClient(secret: string) {
     },
   });
 }
-
-function householdError(code?: string): Error {
+function setupError() {
   return new Error(
-    code === "28000"
-      ? "This household link no longer works. Check the link with someone in your household."
-      : "Could not open the household. Check your connection and try again.",
+    "Household sign-in is not set up yet. Please contact the app owner to finish setup.",
   );
 }
-
+function rpcError(code?: string): Error {
+  if (code === "PGRST202") return setupError();
+  if (code === "28000")
+    return new Error(
+      "Your household session has expired. Sign in with the household ID and password.",
+    );
+  return new Error("Could not connect to your household. Please try again.");
+}
+const errors: Record<string, string> = {
+  invalid_credentials: "The household ID or password is incorrect.",
+  rate_limited:
+    "Too many sign-in attempts for this household. Please wait one minute and try again.",
+  slug_taken:
+    "That household ID is already taken. Choose another, such as adding -2.",
+  invalid_slug:
+    "Use 3–64 lowercase letters, numbers, and single hyphens for the household ID.",
+  invalid_name: "Use a household name between 1 and 80 characters.",
+  invalid_password:
+    "Use at least 8 characters and no more than 72 bytes for the password.",
+  invalid_session: "Your household session has expired. Sign in again.",
+  already_setup:
+    "This household already has a password. Sign in with its ID and password.",
+};
+function resultHousehold(data: unknown, secret: string): Household {
+  if (!data || typeof data !== "object") throw rpcError();
+  const result = data as Record<string, unknown>;
+  if (typeof result.error === "string")
+    throw new Error(
+      errors[result.error] ?? "Could not open the household. Please try again.",
+    );
+  if (
+    typeof result.id !== "string" ||
+    typeof result.name !== "string" ||
+    typeof result.needs_password !== "boolean" ||
+    !(result.slug === null || typeof result.slug === "string")
+  )
+    throw setupError();
+  return {
+    id: result.id,
+    name: result.name,
+    slug: result.slug,
+    needsPassword: result.needs_password,
+    secret,
+  };
+}
 export async function openHousehold(secret: string): Promise<Household> {
   const { data, error } = await householdClient(secret).rpc("get_household");
-  if (error) throw householdError(error.code);
-  if (!data || typeof data.id !== "string" || typeof data.name !== "string")
-    throw householdError();
-  return { id: data.id, name: data.name, secret };
+  if (error) throw rpcError(error.code);
+  return resultHousehold(data, secret);
 }
-
 export async function createHousehold(
-  name: string,
+  input: HouseholdInput,
   secret: string,
 ): Promise<Household> {
-  const clean = name.trim();
-  if (!clean || clean.length > 80)
-    throw new Error("Use a household name between 1 and 80 characters.");
+  const name = input.name.trim();
+  if (!name || name.length > 80) throw new Error(errors.invalid_name);
+  validateId(input.slug);
+  validateHouseholdPassword(input.password);
   const { data, error } = await householdClient(secret).rpc(
     "create_household",
-    { p_name: clean },
+    {
+      p_name: name,
+      p_slug: input.slug,
+      p_password: input.password,
+    },
   );
-  if (error)
-    throw new Error(
-      "Could not create the household. Check your connection and try again.",
-    );
-  if (!data || typeof data.id !== "string" || typeof data.name !== "string")
-    throw householdError();
-  return { id: data.id, name: data.name, secret };
+  if (error) throw rpcError(error.code);
+  return resultHousehold(data, secret);
 }
-
+export async function loginHousehold(
+  slug: string,
+  password: string,
+  secret: string,
+): Promise<Household> {
+  if (!slug.trim() || !password)
+    throw new Error("Enter the household ID and password.");
+  const { data, error } = await householdClient(secret).rpc("login_household", {
+    p_slug: slug.trim().toLowerCase(),
+    p_password: password,
+  });
+  if (error) throw rpcError(error.code);
+  return resultHousehold(data, secret);
+}
+export async function setHouseholdPassword(
+  oldSecret: string,
+  slug: string,
+  password: string,
+  newSecret: string,
+): Promise<Household> {
+  validateId(slug);
+  validateHouseholdPassword(password);
+  const { data, error } = await householdClient(oldSecret).rpc(
+    "set_household_password",
+    {
+      p_slug: slug,
+      p_password: password,
+      p_session_key: newSecret,
+    },
+  );
+  // Recover if the password was saved but the first response was lost.
+  if (error || data?.error === "invalid_session") {
+    try {
+      return await openHousehold(newSecret);
+    } catch {
+      /* Show the original failure below. */
+    }
+  }
+  if (error) throw rpcError(error.code);
+  return resultHousehold(data, newSecret);
+}
+export async function logoutHousehold(secret: string) {
+  const { error } = await householdClient(secret).rpc("logout_household");
+  if (error) throw rpcError(error.code);
+}
+function clearInviteFragment() {
+  const url = new URL(window.location.href);
+  url.hash = "";
+  window.history.replaceState(null, "", url.href);
+}
 export function rememberHousehold(household: Household) {
-  // The fragment stays in the browser; it isn't sent to GitHub Pages or as a referrer.
-  window.history.replaceState(null, "", householdLink(household.secret));
+  clearInviteFragment();
   localStorage.setItem(householdStorageKey, household.secret);
+}
+export function forgetHousehold() {
+  clearInviteFragment();
+  localStorage.removeItem(householdStorageKey);
 }

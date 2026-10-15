@@ -125,6 +125,13 @@ export function createRepository(householdSecret?: string): Repository {
   return {
     mode: "shared",
     async list() {
+      const session = await client.rpc("get_household");
+      if (session.error)
+        throw new Error(
+          session.error.code === "28000"
+            ? "Your household session has expired. Sign in again using Switch household."
+            : "Could not verify your household session. Please try again.",
+        );
       const { data, error } = await client
         .from("shopping_items")
         .select("*")

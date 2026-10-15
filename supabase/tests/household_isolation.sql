@@ -1,4 +1,5 @@
--- Run against a disposable database AFTER the migrations. All fixtures roll back.
+-- Legacy link-only tests: disposable database after migration 003, BEFORE 004.
+-- For the current password-based model, run household_passwords.sql instead.
 begin;
 set local role anon;
 select set_config('request.headers', '{"x-household-key":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}', true);
