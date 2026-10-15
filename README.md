@@ -34,7 +34,7 @@ The data-access boundary is [`src/lib/repository.ts`](src/lib/repository.ts); fu
 ## Everyday use
 
 - Type a name and press Enter or Add. Names are trimmed, duplicates allowed, and defaults are 1 piece.
-- Tap a name to edit in its row. Change name, quantity or unit; Enter/Save persists, Escape/Cancel discards the draft.
+- Tap the pencil to edit an item in its row. Names and quantities are plain text. Enter/Save persists changes; Escape/Cancel discards the draft and returns focus to the pencil.
 - Quantities accept comma or period decimals, up to three decimal places, between 0 and 999999 (exclusive of zero). Units: piece, g, kg, ml, l. No conversions.
 - One checkbox tap gathers a provision. Gathered items remain below active items and can be unchecked.
 - Delete an individual item with its labelled × control. Clear gathered asks for confirmation.

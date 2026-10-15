@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "../../components/Icon";
 import {
   formatQuantity,
@@ -23,6 +23,18 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
   const [unit, setUnit] = useState(item.unit);
   const [error, setError] = useState("");
   const [nameError, setNameError] = useState("");
+  const editTrigger = useRef<HTMLButtonElement>(null);
+  const restoreFocus = useRef(false);
+  useEffect(() => {
+    if (!editing && restoreFocus.current) {
+      editTrigger.current?.focus();
+      restoreFocus.current = false;
+    }
+  }, [editing]);
+  function finishEditing() {
+    restoreFocus.current = true;
+    setEditing(false);
+  }
   function begin() {
     setName(item.name);
     setQuantity(String(item.quantity));
@@ -45,7 +57,7 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
         quantity: parseQuantity(quantity),
         unit,
       });
-      if (await save(input)) setEditing(false);
+      if (await save(input)) finishEditing();
     } catch (cause) {
       setError(
         cause instanceof Error ? cause.message : "Check the item details.",
@@ -55,14 +67,14 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
   return (
     <li className={`item ${item.is_purchased ? "purchased" : ""}`}>
       <label className="check-target">
-      <input
-        className="check"
-        type="checkbox"
-        aria-label={`Mark ${item.name} as ${item.is_purchased ? "needed" : "purchased"}`}
-        checked={item.is_purchased}
-        disabled={busy || editing}
-        onChange={toggle}
-      />
+        <input
+          className="check"
+          type="checkbox"
+          aria-label={`Mark ${item.name} as ${item.is_purchased ? "needed" : "purchased"}`}
+          checked={item.is_purchased}
+          disabled={busy || editing}
+          onChange={toggle}
+        />
       </label>
       {editing ? (
         <form
@@ -71,7 +83,7 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
           onKeyDown={(event) => {
             if (event.key === "Escape" && !busy) {
               event.preventDefault();
-              setEditing(false);
+              finishEditing();
             }
           }}
         >
@@ -89,7 +101,15 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
               }}
               disabled={busy}
             />
-            {nameError && <span className="field-error" id={`name-error-${item.id}`} role="alert">{nameError}</span>}
+            {nameError && (
+              <span
+                className="field-error"
+                id={`name-error-${item.id}`}
+                role="alert"
+              >
+                {nameError}
+              </span>
+            )}
           </label>
           <label>
             <span className="sr-only">Quantity</span>
@@ -124,7 +144,7 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
               type="button"
               aria-label="Cancel"
               title="Cancel (Escape)"
-              onClick={() => setEditing(false)}
+              onClick={finishEditing}
             >
               <Icon name="close" />
             </button>
@@ -146,26 +166,22 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
         </form>
       ) : (
         <>
-          <button
-            className="item-title"
-            onClick={begin}
-            disabled={busy}
-            aria-label={`Edit ${item.name}`}
-          >
+          <span className="item-title">
             <span>{item.name}</span>
-          </button>
-          <button className="item-quantity" onClick={begin} disabled={busy} aria-label={`Edit quantity for ${item.name}`} title="Edit quantity">
+          </span>
+          <span className="item-quantity">
             {formatQuantity(item.quantity)}{" "}
             {item.unit === "piece" && item.quantity !== 1
               ? "pieces"
               : units[item.unit]}
-          </button>
+          </span>
           <div className="row-actions">
             <button
               className="icon-button quiet"
+              ref={editTrigger}
               onClick={begin}
               disabled={busy}
-              aria-label={`Edit details for ${item.name}`}
+              aria-label={`Edit ${item.name}`}
               title="Edit"
             >
               <Icon name="edit" />

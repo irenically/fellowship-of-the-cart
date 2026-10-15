@@ -9,7 +9,9 @@ it("shows empty-name validation under the input and clears it while typing", asy
   const repo = localRepository();
   const user = userEvent.setup();
   render(<App repository={repo} />);
-  const input = screen.getByPlaceholderText("What shall we acquire?") as HTMLInputElement;
+  const input = screen.getByPlaceholderText(
+    "What shall we acquire?",
+  ) as HTMLInputElement;
   await waitFor(() => expect(input.disabled).toBe(false));
   await user.click(screen.getByRole("button", { name: "Add item" }));
   expect(input.getAttribute("aria-invalid")).toBe("true");
@@ -25,7 +27,9 @@ it("shows empty-name validation under the input and clears it while typing", asy
   await user.clear(input);
   await user.paste("a".repeat(160));
   await user.keyboard("{Enter}");
-  await waitFor(async () => expect((await repo.list())[0].name).toHaveLength(160));
+  await waitFor(async () =>
+    expect((await repo.list())[0].name).toHaveLength(160),
+  );
 });
 it("moves an item home and returns it to shopping without deleting it", async () => {
   const repo = localRepository();
@@ -53,6 +57,9 @@ it("adds with Enter, refocuses, cancels edits, saves comma quantities and comple
   await screen.findByRole("button", { name: "Edit Milk" });
   expect((input as HTMLInputElement).value).toBe("");
   expect(document.activeElement).toBe(input);
+  await user.click(screen.getByText("Milk", { exact: true }));
+  await user.click(screen.getByText("1 piece", { exact: true }));
+  expect(screen.queryByRole("button", { name: "Save" })).toBeNull();
   await user.click(screen.getByRole("button", { name: "Edit Milk" }));
   await user.clear(
     screen.getByLabelText("Item name", { selector: ".editor input" }),
@@ -62,12 +69,18 @@ it("adds with Enter, refocuses, cancels edits, saves comma quantities and comple
     "Bread{Escape}",
   );
   expect(screen.getByRole("button", { name: "Edit Milk" })).toBeTruthy();
+  expect(document.activeElement).toBe(
+    screen.getByRole("button", { name: "Edit Milk" }),
+  );
   await user.click(screen.getByRole("button", { name: "Edit Milk" }));
   await user.clear(screen.getByLabelText("Quantity"));
   await user.type(screen.getByLabelText("Quantity"), "1,5");
   await user.selectOptions(screen.getByLabelText("Unit"), "l");
   await user.click(screen.getByRole("button", { name: "Save" }));
   await screen.findByText("1.5 l");
+  expect(document.activeElement).toBe(
+    screen.getByRole("button", { name: "Edit Milk" }),
+  );
   await user.click(
     screen.getByRole("checkbox", { name: "Mark Milk as purchased" }),
   );
@@ -95,9 +108,13 @@ it("keeps failed additions visible in the input and prevents duplicate submissio
   await waitFor(() => expect((input as HTMLInputElement).disabled).toBe(false));
   await user.type(input, "Milk{Enter}{Enter}");
   expect(repo.add).toHaveBeenCalledTimes(1);
+  expect((input as HTMLInputElement).readOnly).toBe(true);
+  await user.type(input, "Bread");
+  expect((input as HTMLInputElement).value).toBe("Milk");
   reject(new Error("Connection lost"));
   await screen.findByRole("alert");
   expect(screen.getByRole("alert").textContent).toContain("Connection lost");
   expect((input as HTMLInputElement).value).toBe("Milk");
+  expect((input as HTMLInputElement).readOnly).toBe(false);
   expect(screen.queryByRole("button", { name: "Edit Milk" })).toBeNull();
 });
