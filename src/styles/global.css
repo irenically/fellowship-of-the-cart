@@ -154,6 +154,72 @@ h2 {
   min-width: 190px;
   font-variant-numeric: tabular-nums;
 }
+.household-controls {
+  border-bottom: 1px solid #dedfd3;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+.household-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+.household-name {
+  flex: 1 1 140px;
+  min-width: 0;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.household-hint {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+.household-controls .MuiTextField-root {
+  margin-top: 8px;
+}
+.household-setup {
+  max-width: 680px;
+  margin: 0 auto 24px;
+}
+.household-intro {
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 8px 0 24px;
+}
+.household-form {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+.household-form .MuiTextField-root {
+  flex: 1 1 200px;
+}
+.household-form button {
+  flex-shrink: 0;
+  min-height: 46px;
+  padding-inline: 16px;
+}
+.household-join {
+  border-top: 1px solid #dedfd3;
+  margin-top: 24px;
+  padding-top: 16px;
+}
+.household-join h3 {
+  font-size: 18px;
+  font-weight: 400;
+  margin: 0;
+}
+.household-opening {
+  padding-block: 12px;
+}
 .add-form {
   display: flex;
   gap: 9px;

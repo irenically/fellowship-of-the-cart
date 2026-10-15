@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { householdClient, sharedConfiguration } from "./household";
 import {
   validateInput,
   type Item,
@@ -94,22 +94,13 @@ export function localRepository(storage: Storage = localStorage): Repository {
     },
   };
 }
-export function createRepository(): Repository {
-  const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as
-    string | undefined;
-  if (!url && !key) return localRepository();
-  if (!url || !key)
+export function createRepository(householdSecret?: string): Repository {
+  if (!sharedConfiguration()) return localRepository();
+  if (!householdSecret)
     throw new Error(
-      "Set both Supabase environment variables, or leave both empty for local mode.",
+      "Open a household invite link or create a household first.",
     );
-  const client = createClient(url, key, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-    },
-  });
+  const client = householdClient(householdSecret);
   async function check(
     result: PromiseLike<{ error: { message: string } | null }>,
   ) {
@@ -159,19 +150,12 @@ export function createRepository(): Repository {
       );
     },
     subscribe(refresh) {
-      const channel = client
-        .channel("shopping-list")
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "shopping_items" },
-          refresh,
-        )
-        .subscribe((state) => {
-          if (state === "SUBSCRIBED") refresh();
-        });
-      return () => {
-        void client.removeChannel(channel);
-      };
+      // Every refresh uses the household header and database access rules.
+      // Realtime sockets cannot use this HTTP-only access mechanism.
+      const timer = window.setInterval(() => {
+        if (document.visibilityState === "visible") refresh();
+      }, 5000);
+      return () => window.clearInterval(timer);
     },
   };
 }
