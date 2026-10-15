@@ -27,6 +27,7 @@ import {
 } from "../../lib/household";
 import { App } from "../shopping-list/App";
 import { HouseholdInvite } from "./HouseholdInvite";
+import { HouseholdGuide } from "./HouseholdGuide";
 
 interface Session {
   household: Household;
@@ -305,6 +306,7 @@ export function HouseholdApp() {
               </p>
             )}
             {error && <Alert severity="error">{error}</Alert>}
+            <HouseholdGuide />
           </div>
         }
       />
@@ -474,6 +476,7 @@ export function HouseholdApp() {
             )}
           </div>
         )}
+        <HouseholdGuide />
       </Paper>
     </AppLayout>
   );
