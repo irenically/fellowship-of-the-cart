@@ -1,14 +1,17 @@
 ﻿import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import {
   createHousehold,
+  createHouseholdInvite,
   forgetHousehold,
   householdId,
+  householdInviteLink,
   householdStorageKey,
   initialHouseholdSecret,
   loginHousehold,
   newHouseholdSecret,
   openHousehold,
   rememberHousehold,
+  readHouseholdInvite,
   secretFromLink,
   validateHouseholdPassword,
 } from "./household";
@@ -61,13 +64,66 @@ it("uses random 256-bit session tokens rather than passwords", () => {
   expect(newHouseholdSecret()).toMatch(/^[a-f0-9]{64}$/);
   expect(newHouseholdSecret()).not.toBe(newHouseholdSecret());
 });
-it("checks the bcrypt byte limit without silently truncating Unicode passwords", () => {
-  expect(() => validateHouseholdPassword("short")).toThrow("at least 8");
-  expect(() => validateHouseholdPassword(" ".repeat(8))).toThrow();
-  expect(() => validateHouseholdPassword("é".repeat(36))).not.toThrow();
-  expect(() => validateHouseholdPassword("é".repeat(37))).toThrow("too long");
-  expect(() => validateHouseholdPassword("a".repeat(73))).toThrow("too long");
-  expect(() => validateHouseholdPassword("abcdefgh\0")).toThrow();
+
+it("round-trips invite credentials in a fragment without putting them in request paths or queries", () => {
+  const password = " +&#=?é emoji🧙 ";
+  const link = householdInviteLink(
+    "my-household",
+    password,
+    "https://example.com/cart/?tracking=1#old",
+  );
+  const url = new URL(link);
+  expect(url.pathname).toBe("/cart/");
+  expect(url.search).toBe("");
+  expect(readHouseholdInvite(link)).toEqual({ slug: "my-household", password });
+  expect(readHouseholdInvite("https://example.com/cart/")).toBeNull();
+  for (const hash of [
+    "invite=1",
+    "invite=2&id=my-household&password=password123",
+    "invite=1&id=my-household&id=other-home&password=password123",
+    "invite=1&id=INVALID&password=password123",
+  ])
+    expect(() =>
+      readHouseholdInvite(`https://example.com/cart/#${hash}`),
+    ).toThrow("invite link is invalid");
+});
+
+it("generates invites using the existing session without sending a password", async () => {
+  const credential = "c".repeat(64);
+  const fetch = mockRpc({ slug: input.slug, credential });
+  const household = { ...metadata, needsPassword: false, secret };
+  const link = await createHouseholdInvite(household);
+  expect(readHouseholdInvite(link)).toEqual({
+    slug: input.slug,
+    password: credential,
+  });
+  expect(fetch).toHaveBeenCalledTimes(1);
+  const [url, options] = fetch.mock.calls[0] as unknown as [
+    string,
+    RequestInit,
+  ];
+  expect(url).toContain("/rpc/create_household_invite");
+  expect(new Headers(options.headers).get("x-household-key")).toBe(secret);
+  expect(String(options.body)).not.toContain("p_password");
+  expect(localStorage.length).toBe(0);
+  expect(window.location.hash).toBe("");
+  mockRpc({ code: "28000", message: "Session expired" }, 401);
+  await expect(createHouseholdInvite(household)).rejects.toThrow(
+    "Sign in with the household ID",
+  );
+});
+it("allows short, whitespace, Unicode and long passwords without composition rules", () => {
+  for (const password of [
+    "x",
+    "short",
+    " ",
+    "a".repeat(10000),
+    "\u00e9".repeat(1000),
+  ])
+    expect(() => validateHouseholdPassword(password)).not.toThrow();
+  expect(() => validateHouseholdPassword("")).toThrow(
+    "Enter a household password",
+  );
 });
 it("sends ID and password only in the RPC body, with a separate session header", async () => {
   const fetch = mockRpc(metadata);

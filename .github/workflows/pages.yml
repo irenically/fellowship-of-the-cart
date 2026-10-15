@@ -8,7 +8,7 @@ permissions:
   contents: read
 concurrency:
   group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -30,9 +30,58 @@ jobs:
         if: github.event_name != 'pull_request'
         with:
           path: dist
+  database-check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      SUPABASE_DB_URL: postgresql://postgres:ci-only-password@127.0.0.1:5432/postgres
+      PGSSLMODE: disable
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.121.0
+      - name: Install PostgreSQL client
+        run: sudo apt-get update -qq && sudo apt-get install -y postgresql-client
+      - name: Prepare disposable Supabase roles
+        run: psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -c 'CREATE ROLE anon; CREATE ROLE authenticated; CREATE PUBLICATION supabase_realtime;'
+      - name: Verify migration automation from an empty database
+        run: bash scripts/migrate-database.sh
+      - name: Verify a repeated deployment is a no-op
+        run: bash scripts/migrate-database.sh
+      - name: Verify household data rules
+        run: |
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/permanent_household_access.sql > /dev/null
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/unrestricted_passwords.sql > /dev/null
+  migrate:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: [build, database-check]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.121.0
+      - name: Install PostgreSQL client
+        run: sudo apt-get update -qq && sudo apt-get install -y postgresql-client
+      - name: Apply pending Supabase migrations
+        run: bash scripts/migrate-database.sh
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    needs: build
+    needs: [build, database-check, migrate]
     runs-on: ubuntu-latest
     permissions:
       pages: write

@@ -199,6 +199,20 @@ h2 {
 .household-auth-error {
   margin-top: 16px;
 }
+.household-invite {
+  border-top: 1px solid #dedfd3;
+  margin-top: 12px;
+  padding-top: 12px;
+}
+.household-invite h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 400;
+}
+.household-invite > .MuiTextField-root,
+.household-invite > .household-toolbar {
+  margin-top: 12px;
+}
 .household-hint {
   font-size: 13px;
   line-height: 1.6;

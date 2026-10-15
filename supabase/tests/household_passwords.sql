@@ -1,4 +1,5 @@
--- Disposable PostgreSQL database only, after migrations 001–004. Fixtures roll back.
+-- Legacy lifecycle checks: disposable database after 004-006, before 007.
+-- For permanent access, run permanent_household_access.sql and unrestricted_passwords.sql.
 begin;
 -- Simulate an existing link-based household with groceries to preserve.
 insert into cart_private.households(id, name, secret_hash) values
@@ -80,13 +81,13 @@ do $$ declare result jsonb; begin
   if result->>'error' <> 'rate_limited' then raise exception 'Lockout bypass'; end if;
   result := public.login_household('does-not-exist', 'fixture-password');
   if result->>'error' <> 'invalid_credentials' then raise exception 'Unknown ID differs from wrong password'; end if;
-  result := public.create_household('Bad password', 'bad-password', repeat('é',37));
-  if result->>'error' <> 'invalid_password' then raise exception 'Bcrypt Unicode input silently truncated'; end if;
+  result := public.create_household('Missing password', 'missing-password', '');
+  if result->>'error' <> 'invalid_password' then raise exception 'Empty password accepted'; end if;
 end $$;
 reset role;
 do $$ begin
   if (select failed_attempts from cart_private.households where slug='my-household') <> 8 then raise exception 'Failed attempt counters rolled back'; end if;
-  if exists(select 1 from cart_private.households where password_hash is not null and password_hash !~ '^\$2a\$10\$') then raise exception 'Password not bcrypt hashed'; end if;
+  if exists(select 1 from cart_private.households where password_hash is not null and password_hash !~ '^(\{sha256\})?\$2a\$10\$') then raise exception 'Password not bcrypt hashed'; end if;
 end $$;
 update cart_private.households set locked_until=now()-interval '1 second', attempt_window=now()-interval '6 minutes' where slug='my-household';
 update cart_private.household_sessions set expires_at=now()-interval '1 second' where secret_hash=sha256(convert_to(repeat('a',64),'UTF8'));

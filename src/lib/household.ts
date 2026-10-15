@@ -12,6 +12,10 @@ export interface HouseholdInput {
   slug: string;
   password: string;
 }
+export interface HouseholdInvite {
+  slug: string;
+  password: string;
+}
 export const householdStorageKey = "fellowship-household:v1";
 const secretPattern = /^[a-f0-9]{64}$/;
 
@@ -33,12 +37,7 @@ export function householdId(name: string): string {
   return slug.length >= 3 ? slug : slug ? `${slug}-home` : "household";
 }
 export function validateHouseholdPassword(password: string) {
-  if (Array.from(password).length < 8 || !password.trim())
-    throw new Error("Use a password with at least 8 characters.");
-  if (new TextEncoder().encode(password).length > 72 || password.includes("\0"))
-    throw new Error(
-      "This password is too long. Use up to 72 bytes (fewer for emoji or accented characters).",
-    );
+  if (!password.length) throw new Error("Enter a household password.");
 }
 function validateId(slug: string) {
   if (
@@ -49,6 +48,72 @@ function validateId(slug: string) {
     throw new Error(
       "Use 3–64 lowercase letters, numbers, and single hyphens for the household ID.",
     );
+}
+
+export function householdInviteLink(
+  slug: string,
+  password: string,
+  base = window.location.href,
+): string {
+  validateId(slug);
+  validateHouseholdPassword(password);
+  const url = new URL(base);
+  url.search = "";
+  url.hash = new URLSearchParams({
+    invite: "1",
+    id: slug,
+    password,
+  }).toString();
+  return url.href;
+}
+
+export function readHouseholdInvite(
+  href = window.location.href,
+): HouseholdInvite | null {
+  const params = new URLSearchParams(new URL(href).hash.slice(1));
+  if (!params.has("invite")) return null;
+  const slug = params.get("id");
+  const password = params.get("password");
+  if (
+    params.get("invite") !== "1" ||
+    !slug ||
+    !password ||
+    ["invite", "id", "password"].some((key) => params.getAll(key).length !== 1)
+  )
+    throw new Error(
+      "This household invite link is invalid. Ask for a new link or enter the ID and password.",
+    );
+  try {
+    validateId(slug);
+    validateHouseholdPassword(password);
+  } catch {
+    throw new Error(
+      "This household invite link is invalid. Ask for a new link or enter the ID and password.",
+    );
+  }
+  return { slug, password };
+}
+
+export async function createHouseholdInvite(
+  household: Household,
+): Promise<string> {
+  if (!household.slug || household.needsPassword)
+    throw new Error("Set up your household password first.");
+  const { data, error } = await householdClient(household.secret).rpc(
+    "create_household_invite",
+  );
+  if (error?.code === "PGRST202")
+    throw new Error(
+      "Household invites are not set up yet. Please contact the app owner to finish setup.",
+    );
+  if (error) throw rpcError(error.code);
+  if (
+    data?.slug !== household.slug ||
+    typeof data?.credential !== "string" ||
+    !secretPattern.test(data.credential)
+  )
+    throw new Error("Could not create the invite. Please try again.");
+  return householdInviteLink(data.slug, data.credential);
 }
 
 // Legacy links are retained only to let existing households set a password.
@@ -115,9 +180,7 @@ function setupError() {
 function rpcError(code?: string): Error {
   if (code === "PGRST202") return setupError();
   if (code === "28000")
-    return new Error(
-      "Your household session has expired. Sign in with the household ID and password.",
-    );
+    return new Error("Sign in with the household ID and password to continue.");
   return new Error("Could not connect to your household. Please try again.");
 }
 const errors: Record<string, string> = {
@@ -129,9 +192,8 @@ const errors: Record<string, string> = {
   invalid_slug:
     "Use 3–64 lowercase letters, numbers, and single hyphens for the household ID.",
   invalid_name: "Use a household name between 1 and 80 characters.",
-  invalid_password:
-    "Use at least 8 characters and no more than 72 bytes for the password.",
-  invalid_session: "Your household session has expired. Sign in again.",
+  invalid_password: "Enter a household password.",
+  invalid_session: "This sign-in is no longer valid. Sign in again.",
   already_setup:
     "This household already has a password. Sign in with its ID and password.",
 };
@@ -226,7 +288,7 @@ export async function logoutHousehold(secret: string) {
   const { error } = await householdClient(secret).rpc("logout_household");
   if (error) throw rpcError(error.code);
 }
-function clearInviteFragment() {
+export function clearInviteFragment() {
   const url = new URL(window.location.href);
   url.hash = "";
   window.history.replaceState(null, "", url.href);

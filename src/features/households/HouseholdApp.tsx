@@ -9,6 +9,7 @@ import TextField from "@mui/material/TextField";
 import { AppLayout } from "../../components/AppLayout";
 import { createRepository, type Repository } from "../../lib/repository";
 import {
+  clearInviteFragment,
   createHousehold,
   forgetHousehold,
   householdId,
@@ -17,6 +18,7 @@ import {
   logoutHousehold,
   newHouseholdSecret,
   openHousehold,
+  readHouseholdInvite,
   rememberHousehold,
   secretFromLink,
   setHouseholdPassword,
@@ -24,6 +26,7 @@ import {
   type Household,
 } from "../../lib/household";
 import { App } from "../shopping-list/App";
+import { HouseholdInvite } from "./HouseholdInvite";
 
 interface Session {
   household: Household;
@@ -52,13 +55,20 @@ export function HouseholdApp() {
   const [initial] = useState(() => {
     try {
       const shared = !!sharedConfiguration();
+      const invited = shared && !!readHouseholdInvite();
       return {
         shared,
-        secret: shared ? initialHouseholdSecret() : null,
+        invited,
+        secret: shared && !invited ? initialHouseholdSecret() : null,
         error: "",
       };
     } catch (cause) {
-      return { shared: true, secret: null, error: errorMessage(cause) };
+      return {
+        shared: true,
+        invited: false,
+        secret: null,
+        error: errorMessage(cause),
+      };
     }
   });
   const [session, setSession] = useState<Session | null>(null);
@@ -67,21 +77,33 @@ export function HouseholdApp() {
   const [mode, setMode] = useState<"signin" | "create">("signin");
   const [name, setName] = useState("");
   const [manualId, setManualId] = useState<string | null>(null);
-  const [loginId, setLoginId] = useState("");
-  const [password, setPassword] = useState("");
+  const [loginId, setLoginId] = useState(() =>
+    initial.invited ? (readHouseholdInvite()?.slug ?? "") : "",
+  );
+  const [password, setPassword] = useState(() =>
+    initial.invited ? (readHouseholdInvite()?.password ?? "") : "",
+  );
   const [confirmation, setConfirmation] = useState("");
   const [error, setError] = useState(initial.error);
-  const [notice, setNotice] = useState("");
+  const [notice, setNotice] = useState(
+    initial.invited
+      ? "Household details filled in from your invite. Press Sign in to continue."
+      : "",
+  );
+  const [showInvite, setShowInvite] = useState(false);
   const request = useRef(0);
   const lock = useRef(false);
   const creationKey = useRef<{ identity: string; key: string } | null>(null);
   const upgradeKey = useRef<string | null>(null);
+  const inviteTrigger = useRef<HTMLButtonElement>(null);
   const upgrading = !!session?.household.needsPassword && !choosing;
   const creating = mode === "create" || upgrading;
   const slug = creating ? (manualId ?? householdId(name)) : loginId;
 
   useEffect(() => {
     if (!initial.shared) return;
+    if (new URLSearchParams(window.location.hash.slice(1)).has("invite"))
+      clearInviteFragment();
     let disposed = false;
     async function connect(secret: string) {
       const generation = ++request.current;
@@ -95,6 +117,7 @@ export function HouseholdApp() {
         setSession(next.session);
         setNotice(next.notice);
         setChoosing(false);
+        setShowInvite(false);
         setPassword("");
         setConfirmation("");
         if (household.needsPassword) {
@@ -110,6 +133,30 @@ export function HouseholdApp() {
     }
     if (initial.secret) void connect(initial.secret);
     const onHashChange = () => {
+      if (new URLSearchParams(window.location.hash.slice(1)).has("invite")) {
+        request.current++;
+        setPending(false);
+        setChoosing(true);
+        setMode("signin");
+        setConfirmation("");
+        setShowInvite(false);
+        try {
+          const invite = readHouseholdInvite()!;
+          setLoginId(invite.slug);
+          setPassword(invite.password);
+          setError("");
+          setNotice(
+            "Household details filled in from your invite. Press Sign in to continue.",
+          );
+        } catch (cause) {
+          setLoginId("");
+          setPassword("");
+          setError(errorMessage(cause));
+          setNotice("");
+        }
+        clearInviteFragment();
+        return;
+      }
       if (!new URLSearchParams(window.location.hash.slice(1)).has("household"))
         return;
       try {
@@ -165,6 +212,7 @@ export function HouseholdApp() {
       setSession(next.session);
       setNotice(next.notice);
       setChoosing(false);
+      setShowInvite(false);
       setPassword("");
       setConfirmation("");
       setName("");
@@ -210,19 +258,7 @@ export function HouseholdApp() {
     setConfirmation("");
     setError("");
     setNotice("");
-  }
-  async function copyId() {
-    if (!session?.household.slug) return;
-    try {
-      await navigator.clipboard.writeText(session.household.slug);
-      setNotice(
-        "Household ID copied. Share it and your household password with members.",
-      );
-    } catch {
-      setNotice(
-        `Household ID: ${session.household.slug}. Share it and your household password with members.`,
-      );
-    }
+    setShowInvite(false);
   }
 
   if (!initial.shared) return <App />;
@@ -238,14 +274,31 @@ export function HouseholdApp() {
                 <span className="household-name">{session.household.name}</span>
                 <span className="household-id">{session.household.slug}</span>
               </div>
-              <Button variant="outlined" onClick={() => void copyId()}>
-                Copy household ID
+              <Button
+                variant="outlined"
+                ref={inviteTrigger}
+                aria-controls={
+                  showInvite ? "household-invite-panel" : undefined
+                }
+                aria-expanded={showInvite}
+                onClick={() => setShowInvite(!showInvite)}
+              >
+                Invite members
               </Button>
               <Button onClick={chooseHousehold}>Switch household</Button>
               <Button disabled={pending} onClick={() => void signOut()}>
                 Sign out
               </Button>
             </div>
+            {showInvite && (
+              <HouseholdInvite
+                household={session.household}
+                close={() => {
+                  setShowInvite(false);
+                  inviteTrigger.current?.focus();
+                }}
+              />
+            )}
             {notice && (
               <p className="household-hint" role="status">
                 {notice}
@@ -310,6 +363,11 @@ export function HouseholdApp() {
             {error}
           </Alert>
         )}
+        {notice && !error && (
+          <p className="household-hint" role="status">
+            {notice}
+          </p>
+        )}
         {pending ? (
           <div className="household-opening">
             <p role="status">Opening your household…</p>
@@ -364,7 +422,7 @@ export function HouseholdApp() {
               required
               helperText={
                 creating
-                  ? "At least 8 characters. Share this password only with your household."
+                  ? "Choose any password and share it with your household."
                   : undefined
               }
             />

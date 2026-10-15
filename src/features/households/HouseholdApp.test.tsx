@@ -1,6 +1,7 @@
 ﻿import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { StrictMode } from "react";
 import { AppTheme } from "../../styles/theme";
 import * as households from "../../lib/household";
 import { createRepository, localRepository } from "../../lib/repository";
@@ -11,6 +12,7 @@ vi.mock("../../lib/household", async (original) => ({
   initialHouseholdSecret: vi.fn(),
   openHousehold: vi.fn(),
   createHousehold: vi.fn(),
+  createHouseholdInvite: vi.fn(),
   loginHousehold: vi.fn(),
   logoutHousehold: vi.fn(),
   setHouseholdPassword: vi.fn(),
@@ -52,8 +54,94 @@ beforeEach(() => {
     key: "public-key",
   });
   vi.mocked(households.initialHouseholdSecret).mockReturnValue(null);
+  vi.mocked(households.createHouseholdInvite).mockResolvedValue(
+    households.householdInviteLink(homeA.slug, "c".repeat(64)),
+  );
 });
 afterEach(cleanup);
+
+it("prefills both invite fields, clears the URL, and waits for sign-in instead of opening a remembered household", async () => {
+  const repo = isolatedRepository();
+  await repo.add({ name: "Invited groceries", quantity: 1, unit: "piece" });
+  vi.mocked(households.initialHouseholdSecret).mockReturnValue(homeA.secret);
+  vi.mocked(households.loginHousehold).mockResolvedValue(homeB);
+  vi.mocked(createRepository).mockReturnValue(repo);
+  const password = " exact fixture password +& ";
+  window.history.replaceState(
+    null,
+    "",
+    households.householdInviteLink(homeB.slug, password),
+  );
+  const user = userEvent.setup();
+  render(
+    <StrictMode>
+      <AppTheme>
+        <HouseholdApp />
+      </AppTheme>
+    </StrictMode>,
+  );
+  expect(
+    (screen.getByRole("textbox", { name: /Household ID/ }) as HTMLInputElement)
+      .value,
+  ).toBe(homeB.slug);
+  expect(
+    (screen.getByLabelText("Password", { exact: false }) as HTMLInputElement)
+      .value,
+  ).toBe(password);
+  expect(window.location.hash).toBe("");
+  expect(households.openHousehold).not.toHaveBeenCalled();
+  expect(households.loginHousehold).not.toHaveBeenCalled();
+  await user.click(screen.getByRole("button", { name: "Sign in" }));
+  await screen.findByRole("button", { name: "Edit Invited groceries" });
+  expect(households.loginHousehold).toHaveBeenCalledWith(
+    homeB.slug,
+    password,
+    expect.any(String),
+  );
+});
+
+it("rejects malformed explicit invites without falling back to saved sessions", async () => {
+  window.history.replaceState(null, "", "/#invite=1&id=home-b&password=");
+  vi.mocked(households.initialHouseholdSecret).mockReturnValue(homeA.secret);
+  mount();
+  expect(screen.getByRole("alert").textContent).toContain(
+    "invite link is invalid",
+  );
+  expect(window.location.hash).toBe("");
+  expect(households.openHousehold).not.toHaveBeenCalled();
+  expect(createRepository).not.toHaveBeenCalled();
+});
+
+it("generates and copies an invite on one click without asking for a password", async () => {
+  vi.mocked(households.initialHouseholdSecret).mockReturnValue(homeA.secret);
+  vi.mocked(households.openHousehold).mockResolvedValue(homeA);
+  vi.mocked(createRepository).mockReturnValue(isolatedRepository());
+  const link = households.householdInviteLink(homeA.slug, "c".repeat(64));
+  vi.mocked(households.createHouseholdInvite).mockResolvedValue(link);
+  const user = userEvent.setup();
+  mount();
+  await screen.findByText(homeA.name);
+  await user.click(screen.getByRole("button", { name: "Invite members" }));
+  expect(
+    (
+      (await screen.findByRole("textbox", {
+        name: "Private invite link",
+      })) as HTMLInputElement
+    ).value,
+  ).toBe(link);
+  expect(households.createHouseholdInvite).toHaveBeenCalledWith(homeA);
+  expect(households.createHouseholdInvite).toHaveBeenCalledTimes(1);
+  expect(
+    screen.queryByLabelText("Household password", { exact: false }),
+  ).toBeNull();
+  await user.click(screen.getByRole("button", { name: "Close invite" }));
+  expect(
+    screen.queryByRole("textbox", { name: "Private invite link" }),
+  ).toBeNull();
+  expect(document.activeElement).toBe(
+    screen.getByRole("button", { name: "Invite members" }),
+  );
+});
 function mount() {
   render(
     <AppTheme>
@@ -100,6 +188,7 @@ it("suggests an editable ID, creates a household, and switches without stale ite
   await waitFor(() => expect((input as HTMLInputElement).disabled).toBe(false));
   await user.type(input, "Milk{Enter}");
   await screen.findByRole("button", { name: "Edit Milk" });
+  await user.click(screen.getByRole("button", { name: "Invite members" }));
   await user.click(screen.getByRole("button", { name: "Copy household ID" }));
   expect(screen.getByText(/Household ID copied/)).toBeTruthy();
   await user.click(screen.getByRole("button", { name: "Switch household" }));

@@ -6,3 +6,4 @@ dist/
 .tools/
 coverage/
 *.local
+supabase/.temp/
