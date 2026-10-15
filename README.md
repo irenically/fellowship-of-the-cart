@@ -20,7 +20,7 @@ Leave both environment variables empty for **local-only mode**. A banner identif
 
 ## Enable the shared list
 
-1. Create a Supabase project. Run [`supabase/migrations/202610150001_shopping_items.sql`](supabase/migrations/202610150001_shopping_items.sql) once in its SQL editor (or apply with Supabase migrations). It creates only the shopping table, constraints, timestamp trigger, explicit column grants, RLS policies, and Realtime publication membership.
+1. Create a Supabase project. Apply the SQL files in `supabase/migrations/` in filename order, once each, using the SQL editor or Supabase migrations. The first creates the shopping table, constraints, timestamp trigger, explicit column grants, RLS policies, and Realtime publication membership. The second removes the old 120-character name limit while retaining non-blank name validation. For an existing project that already ran the first migration, run only `202610150002_unlimited_item_names.sql`.
 2. From the project's Connect/API settings, obtain the project URL and **publishable** client key. Never use a secret or service-role key.
 3. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in local `.env`. Set both or neither. Restart Vite after changing them.
 4. For Pages, set the same names as GitHub repository **Actions variables** in Settings → Secrets and variables → Actions → Variables. These values are public and embedded in the bundle. Run the deployment workflow again after changing them.

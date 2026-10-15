@@ -28,8 +28,7 @@ export function parseQuantity(raw: string): number {
 }
 export function validateInput(input: ItemInput): ItemInput {
   const name = input.name.trim();
-  if (!name || name.length > 120)
-    throw new Error("Use an item name between 1 and 120 characters.");
+  if (!name) throw new Error("Enter at least one non-blank character.");
   if (!Object.hasOwn(units, input.unit))
     throw new Error("Choose a supported unit.");
   return {

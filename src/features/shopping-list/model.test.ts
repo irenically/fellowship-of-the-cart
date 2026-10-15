@@ -34,14 +34,15 @@ describe("quantities", () => {
   });
 });
 describe("validation and ordering", () => {
-  it("trims names and rejects blank or oversized names", () => {
+  it("trims names, rejects blank names and allows long names", () => {
     expect(
       validateInput({ name: " Milk ", quantity: 1, unit: "piece" }).name,
     ).toBe("Milk");
-    for (const name of [" ", "a".repeat(121)])
+    for (const name of ["", " "])
       expect(() =>
         validateInput({ name, quantity: 1, unit: "piece" }),
       ).toThrow();
+    expect(validateInput({ name: "a".repeat(500), quantity: 1, unit: "piece" }).name).toHaveLength(500);
   });
   it("groups purchased last without mutating source", () => {
     const a: Item = {

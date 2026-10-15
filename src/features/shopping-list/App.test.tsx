@@ -5,6 +5,45 @@ import { localRepository } from "../../lib/repository";
 import { App } from "./App";
 beforeEach(() => localStorage.clear());
 afterEach(cleanup);
+it("shows empty-name validation under the input and clears it while typing", async () => {
+  const repo = localRepository();
+  const user = userEvent.setup();
+  render(<App repository={repo} />);
+  const input = screen.getByPlaceholderText("What shall we acquire?") as HTMLInputElement;
+  await waitFor(() => expect(input.disabled).toBe(false));
+  await user.click(screen.getByRole("button", { name: "Add item" }));
+  expect(input.getAttribute("aria-invalid")).toBe("true");
+  expect(screen.getByRole("alert").id).toBe("new-item-error");
+  expect(screen.queryByRole("button", { name: "Refresh list" })).toBeNull();
+  await user.type(input, " ");
+  expect(input.getAttribute("aria-invalid")).toBe("true");
+  await user.type(input, "M");
+  expect(input.getAttribute("aria-invalid")).toBe("false");
+  expect(screen.queryByRole("alert")).toBeNull();
+  expect(await repo.list()).toEqual([]);
+  expect(input.getAttribute("maxlength")).toBeNull();
+  await user.clear(input);
+  await user.paste("a".repeat(160));
+  await user.keyboard("{Enter}");
+  await waitFor(async () => expect((await repo.list())[0].name).toHaveLength(160));
+});
+it("moves an item home and returns it to shopping without deleting it", async () => {
+  const repo = localRepository();
+  await repo.add({ name: "Tea", quantity: 2, unit: "piece" });
+  const user = userEvent.setup();
+  render(<App repository={repo} />);
+  await user.click(
+    await screen.findByRole("button", { name: "Already have Tea at home" }),
+  );
+  await screen.findByText("1 of 1 provisions gathered");
+  expect((await repo.list())[0].is_purchased).toBe(true);
+  await user.click(
+    screen.getByRole("button", { name: "Return Tea to shopping" }),
+  );
+  await screen.findByText("0 of 1 provisions gathered");
+  expect(await repo.list()).toHaveLength(1);
+  expect((await repo.list())[0].is_purchased).toBe(false);
+});
 it("adds with Enter, refocuses, cancels edits, saves comma quantities and completes", async () => {
   const user = userEvent.setup();
   render(<App repository={localRepository()} />);

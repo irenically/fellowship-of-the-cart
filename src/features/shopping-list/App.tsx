@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createRepository, type Repository } from "../../lib/repository";
 import { sortItems, validateInput, type Item } from "./model";
 import { ItemRow } from "./ItemRow";
+import { Icon } from "../../components/Icon";
 function message(cause: unknown) {
   return cause instanceof Error
     ? cause.message
@@ -24,6 +25,7 @@ export function App({ repository: supplied }: { repository?: Repository }) {
   const [busy, setBusy] = useState<string | null>(null);
   const lock = useRef(false);
   const [name, setName] = useState("");
+  const [nameError, setNameError] = useState("");
   const input = useRef<HTMLInputElement>(null);
   const request = useRef(0);
   const refresh = useCallback(async () => {
@@ -85,6 +87,12 @@ export function App({ repository: supplied }: { repository?: Repository }) {
   async function add(event: React.FormEvent) {
     event.preventDefault();
     if (!repository || lock.current) return;
+    if (!name.trim()) {
+      setNameError("Enter at least one non-blank character.");
+      input.current?.focus();
+      return;
+    }
+    setNameError("");
     try {
       const value = validateInput({ name, quantity: 1, unit: "piece" });
       if (await act("add", () => repository.add(value))) {
@@ -98,15 +106,22 @@ export function App({ repository: supplied }: { repository?: Repository }) {
   const gathered = items.filter((item) => item.is_purchased).length;
   const remaining = items.length - gathered;
   return (
+    <>
     <main>
       <header className="brand">
         <div className="crest" aria-hidden="true">
-          ♧
+          <img
+            src={`${import.meta.env.BASE_URL}assets/Golden Cart and Olive Branch Ornament.png`}
+            alt=""
+            width="2172"
+            height="724"
+          />
         </div>
-        <p className="eyebrow">A LITTLE ORDER. A GRAND ADVENTURE.</p>
         <h1>
+          <span>
           The Fellowship
           <br className="mobile-break" /> of the Cart
+          </span>
         </h1>
         <p className="tagline">One list to rule them all.</p>
       </header>
@@ -129,27 +144,44 @@ export function App({ repository: supplied }: { repository?: Repository }) {
             <p className="eyebrow">YOUR EVERYDAY ADVENTURE</p>
             <h2 id="quest-heading">The Quest Log</h2>
           </div>
-          <span className="count">{remaining} to gather</span>
+          <div className="shopping-progress">
+            <p className="progress-copy" aria-live="polite" id="shopping-progress-label">
+              {gathered} of {items.length} provisions gathered
+            </p>
+            <progress value={gathered} max={Math.max(items.length, 1)} aria-labelledby="shopping-progress-label" />
+          </div>
         </div>
         <form className="add-form" onSubmit={add}>
           <label className="sr-only" htmlFor="new-item">
             Item name
           </label>
+          <div className="add-field">
           <input
             id="new-item"
             ref={input}
             value={name}
-            maxLength={120}
-            onChange={(event) => setName(event.target.value)}
+            onChange={(event) => {
+              setName(event.target.value);
+              if (event.target.value.trim()) setNameError("");
+            }}
+            aria-invalid={!!nameError}
+            aria-describedby={nameError ? "new-item-error" : undefined}
             placeholder="What shall we acquire?"
             autoComplete="off"
             disabled={!repository || loading}
           />
-          <button type="submit" disabled={!!busy || !repository || loading}>
-            {busy === "add" ? "Adding…" : "+ Add"}
+          {nameError && <p className="field-error" id="new-item-error" role="alert">{nameError}</p>}
+          </div>
+          <button
+            type="submit"
+            aria-label={busy === "add" ? "Adding item" : "Add item"}
+            title="Add item (Enter)"
+            disabled={!!busy || !repository || loading}
+          >
+            <Icon name="plus" />
           </button>
         </form>
-        <p className="hint">A name, an Enter, and you’re on your way.</p>
+        <span className="sr-only" role="status">{busy ? "Saving changes…" : ""}</span>
         {(error || loadError) && (
           <div className="error" role="alert">
             {error || loadError}{" "}
@@ -175,24 +207,24 @@ export function App({ repository: supplied }: { repository?: Repository }) {
             The list could not be loaded. Refresh to try again.
           </p>
         ) : items.length === 0 ? (
-          <div className="empty">
-            <span aria-hidden="true">✧</span>
-            <h3>The quest log is empty.</h3>
-            <p>The pantry may not be.</p>
+          <div className="empty empty-list">
+            <img
+              className="empty-emblem"
+              src={`${import.meta.env.BASE_URL}assets/Golden Cart Botanical Emblem.png`}
+              alt=""
+              aria-hidden="true"
+              width="1536"
+              height="1024"
+            />
+            <h3>
+              <span>The quest log is empty.</span>
+              <span>The pantry may not be.</span>
+            </h3>
+            <p>Add your first provision to begin the journey.</p>
+            <div className="botanical-divider" aria-hidden="true" />
           </div>
         ) : (
           <>
-            <div className="progress-copy" aria-live="polite">
-              <span>
-                {gathered} of {items.length} provisions gathered
-              </span>
-              <span>{Math.round((gathered / items.length) * 100)}%</span>
-            </div>
-            <progress
-              value={gathered}
-              max={items.length}
-              aria-label="Provisions gathered"
-            />
             {([false, true] as const).map((purchased) => {
               const group = items.filter(
                 (item) => item.is_purchased === purchased,
@@ -206,8 +238,23 @@ export function App({ repository: supplied }: { repository?: Repository }) {
                       purchased ? "Gathered provisions" : "Provisions to gather"
                     }
                   >
-                    <h3>
-                      {purchased ? "GATHERED" : "TO GATHER"}{" "}
+                    {purchased && remaining > 0 && (
+                      <div className="botanical-divider" aria-hidden="true" />
+                    )}
+                    <h3
+                      className={`group-heading ${purchased ? "gathered-heading" : ""}`}
+                    >
+                      {purchased && (
+                        <img
+                          className="botanical-sprig"
+                          src={`${import.meta.env.BASE_URL}assets/Watercolor Three-Leaf Botanical Sprig.png`}
+                          alt=""
+                          aria-hidden="true"
+                          width="34"
+                          height="40"
+                        />
+                      )}
+                      {purchased ? "Gathered Provisions" : "TO GATHER"}{" "}
                       <span>{group.length}</span>
                     </h3>
                     <ul>
@@ -261,9 +308,18 @@ export function App({ repository: supplied }: { repository?: Repository }) {
           </>
         )}
       </section>
-      <footer className="page-footer">
-        For the household. For the second breakfast.
-      </footer>
+      <p className="household-note">For the household. For the second breakfast.</p>
     </main>
+    <footer className="page-footer">
+      <div className="footer-content">
+        <p className="footer-copyright">© {new Date().getFullYear()} The Fellowship of the Cart</p>
+        <nav aria-label="Footer links">
+          <a href="https://irenically.github.io/dungeons-and-drumsticks/">Dungeons &amp; Drumsticks</a>
+          <a href="https://github.com/irenically/fellowship-of-the-cart">GitHub</a>
+        </nav>
+        <p className="footer-note">Forged with love, fueled by snacks.</p>
+      </div>
+    </footer>
+    </>
   );
 }
