@@ -43,18 +43,18 @@ it("shows empty-name validation under the input and clears it while typing", asy
     expect((await repo.list())[0].name).toHaveLength(160),
   );
 });
-it("moves an item home and returns it to shopping without deleting it", async () => {
+it("gathers an item with its checkbox and returns it to shopping without deleting it", async () => {
   const repo = localRepository();
   await repo.add({ name: "Tea", quantity: 2, unit: "piece" });
   const user = userEvent.setup();
   render(<App repository={repo} />);
   await user.click(
-    await screen.findByRole("button", { name: "Already have Tea at home" }),
+    await screen.findByRole("checkbox", { name: "Mark Tea as purchased" }),
   );
   await screen.findByText("1 of 1 provisions gathered");
   expect((await repo.list())[0].is_purchased).toBe(true);
   await user.click(
-    screen.getByRole("button", { name: "Return Tea to shopping" }),
+    screen.getByRole("checkbox", { name: "Mark Tea as needed" }),
   );
   await screen.findByText("0 of 1 provisions gathered");
   expect(await repo.list()).toHaveLength(1);

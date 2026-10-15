@@ -234,17 +234,20 @@ h2 {
   padding-block: 12px;
 }
 .household-guide {
-  margin-top: 12px;
+  margin-top: 8px;
   border-top: 1px solid #dedfd3;
   font-size: 14px;
   line-height: 1.6;
 }
 .household-guide summary {
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 8px;
   min-height: 44px;
-  padding-block: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  line-height: 20px;
   color: var(--green);
   cursor: pointer;
   list-style: none;
@@ -516,10 +519,6 @@ ul {
 }
 .row-actions .mobile-more {
   display: none;
-}
-.home-button.is-home {
-  color: var(--green);
-  background: #e9eee1;
 }
 .purchased .item-quantity {
   color: var(--completed-text);

@@ -190,22 +190,6 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
                 <Icon name="edit" />
               </IconButton>
               <IconButton
-                className={`icon-button quiet home-button desktop-row-action ${item.is_purchased ? "is-home" : ""}`}
-                onClick={toggle}
-                disabled={busy}
-                aria-pressed={item.is_purchased}
-                aria-label={
-                  item.is_purchased
-                    ? `Return ${item.name} to shopping`
-                    : `Already have ${item.name} at home`
-                }
-                title={
-                  item.is_purchased ? "Return to shopping" : "Already at home"
-                }
-              >
-                <Icon name="home" />
-              </IconButton>
-              <IconButton
                 className="icon-button delete quiet desktop-row-action"
                 color="error"
                 aria-label={`Delete ${item.name}`}
@@ -233,17 +217,6 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
               open={!!menuAnchor}
               onClose={() => setMenuAnchor(null)}
             >
-              <MenuItem
-                sx={{ minHeight: 44, gap: 1 }}
-                disabled={busy}
-                onClick={() => {
-                  setMenuAnchor(null);
-                  toggle();
-                }}
-              >
-                <Icon name="home" />
-                {item.is_purchased ? "Return to shopping" : "Already at home"}
-              </MenuItem>
               <MenuItem
                 sx={{ minHeight: 44, gap: 1, color: "error.main" }}
                 disabled={busy}

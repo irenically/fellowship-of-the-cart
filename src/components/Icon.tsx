@@ -1,7 +1,6 @@
-type IconName = "edit" | "home" | "trash" | "save" | "close" | "plus" | "more";
+type IconName = "edit" | "trash" | "save" | "close" | "plus" | "more";
 const paths: Record<IconName, string> = {
   edit: "m16 3 5 5-12 12-6 1 1-6L16 3ZM13 6l5 5",
-  home: "m3 10 9-7 9 7v11h-6v-7H9v7H3V10Z",
   trash: "M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7",
   save: "M19 21H5a2 2 0 0 1-2-2V3h14l4 4v12a2 2 0 0 1-2 2ZM7 3v6h10V3M7 21v-8h10v8",
   close: "m6 6 12 12M6 18 18 6",

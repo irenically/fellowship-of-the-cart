@@ -306,7 +306,6 @@ export function HouseholdApp() {
               </p>
             )}
             {error && <Alert severity="error">{error}</Alert>}
-            <HouseholdGuide />
           </div>
         }
       />
