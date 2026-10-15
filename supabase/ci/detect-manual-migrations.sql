@@ -34,6 +34,9 @@ begin
     raise notice 'Historical migration %: %', migration.version, case when migration.applied then 'present' else 'pending' end;
   end loop;
   for migration in select * from cart_manual_migrations order by version loop
+    -- Item-name validation is independent of household schema migrations. Some
+    -- SQL-editor installations skipped it; db push --include-all fills this gap.
+    if migration.version = '202610150002' then continue; end if;
     if not migration.applied then seen_pending := true;
     elsif seen_pending then
       raise exception 'Database changes do not match a complete migration prefix. Stop deployment and inspect the schema before repairing history.';

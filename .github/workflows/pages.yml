@@ -32,6 +32,9 @@ jobs:
           path: dist
   database-check:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        baseline: [empty, manual-households]
     services:
       postgres:
         image: postgres:17
@@ -56,7 +59,13 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y postgresql-client
       - name: Prepare disposable Supabase roles
         run: psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -c 'CREATE ROLE anon; CREATE ROLE authenticated; CREATE PUBLICATION supabase_realtime;'
-      - name: Verify migration automation from an empty database
+      - name: Reproduce historical manual setup with skipped name validation
+        if: matrix.baseline == 'manual-households'
+        run: |
+          for file in supabase/migrations/202610150001_*.sql supabase/migrations/202610150003_*.sql supabase/migrations/202610160004_*.sql; do
+            psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f "$file" > /dev/null
+          done
+      - name: Verify migration automation
         run: bash scripts/migrate-database.sh
       - name: Verify a repeated deployment is a no-op
         run: bash scripts/migrate-database.sh

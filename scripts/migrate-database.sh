@@ -27,4 +27,4 @@ if [[ -n "$applied" ]]; then
   done
   supabase migration repair --db-url "$SUPABASE_DB_URL" --status applied "${versions[@]}" --yes
 fi
-supabase db push --db-url "$SUPABASE_DB_URL" --yes
+supabase db push --db-url "$SUPABASE_DB_URL" --include-all --yes
