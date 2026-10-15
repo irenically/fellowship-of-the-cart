@@ -1,8 +1,19 @@
 import type { ReactNode } from "react";
 
-export function AppLayout({ children }: { children: ReactNode }) {
+export function AppLayout({
+  children,
+  householdHeader,
+}: {
+  children: ReactNode;
+  householdHeader?: ReactNode;
+}) {
   return (
     <>
+      {householdHeader && (
+        <header className="household-page-header" aria-label="Household">
+          <div className="household-header-inner">{householdHeader}</div>
+        </header>
+      )}
       <main>
         <header className="brand">
           <div className="crest" aria-hidden="true">

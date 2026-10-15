@@ -46,7 +46,7 @@ The boundaries are [`src/lib/repository.ts`](src/lib/repository.ts), [`src/lib/h
 
 ## Everyday use
 
-- Choose "Create household," enter its name, choose/accept the suggested ID, and set/confirm a password. Members choose "Sign in" and use that same ID/password. "Invite members" copies a link that fills both fields without asking for the password again; the panel can also copy just the household ID. "Switch household" opens sign-in for another household; "Sign out" revokes this browser's session.
+- Choose "Create household," enter its name, choose/accept the suggested ID, and set/confirm a password. Members choose "Sign in" and use that same ID/password. "Invite members" copies a link that fills both fields without asking for the password again; the panel can also copy just the household ID. "Sign out" revokes this browser's session and returns to sign-in, where another household can be opened.
 - Type a name and press Enter or Add. Names are trimmed, duplicates allowed, and defaults are 1 piece.
 - Tap the pencil to edit an item in its row. Names and quantities are plain text. Enter/Save persists changes; Escape/Cancel discards the draft and returns focus to the pencil.
 - Quantities accept comma or period decimals, up to three decimal places, between 0 and 999999 (exclusive of zero). Units: piece, g, kg, ml, l. No conversions.
@@ -54,6 +54,8 @@ The boundaries are [`src/lib/repository.ts`](src/lib/repository.ts), [`src/lib/h
 - Delete an individual item with its labelled × control. Clear gathered asks for confirmation.
 
 ## Quality checks
+
+The grocery page includes a quiet “A whisper from the realm” strip using `src/data/whispers.json`. It rotates wisdom every 90 seconds and uses the relevant group after successful shopping actions, with a 30-second cooldown. Completion entries combine their title and subtitle into one quote. Hidden tabs and active item editing pause automatic rotation. There are no notifications, sounds, animation, network requests, or live screen-reader announcements for whispers.
 
 ```sh
 npm run lint

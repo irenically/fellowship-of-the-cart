@@ -9,6 +9,8 @@ import {
 import { createRepository, type Repository } from "../../lib/repository";
 import { sortItems, validateInput, type Item } from "./model";
 import { ItemRow } from "./ItemRow";
+import { RealmWhisper } from "./RealmWhisper";
+import { useRealmWhisper, type WhisperType } from "./useRealmWhisper";
 import { Icon } from "../../components/Icon";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
@@ -36,6 +38,7 @@ export function App({
     }
   });
   const repository = configuration.repository;
+  const { quote, whisper } = useRealmWhisper();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(configuration.error);
@@ -83,6 +86,7 @@ export function App({
   async function act(
     key: string,
     operation: () => Promise<void>,
+    whisperType: WhisperType,
   ): Promise<boolean> {
     if (lock.current) return false;
     lock.current = true;
@@ -91,6 +95,7 @@ export function App({
     try {
       await operation();
       await refresh();
+      whisper(whisperType);
       return true;
     } catch (cause) {
       setError(message(cause));
@@ -111,7 +116,13 @@ export function App({
     setNameError("");
     try {
       const value = validateInput({ name, quantity: 1, unit: "piece" });
-      if (await act("add", () => repository.add(value))) {
+      if (
+        await act(
+          "add",
+          () => repository.add(value),
+          items.length ? "itemAdded" : "firstItemAdded",
+        )
+      ) {
         setName("");
         input.current?.focus();
       }
@@ -122,7 +133,7 @@ export function App({
   const gathered = items.filter((item) => item.is_purchased).length;
   const remaining = items.length - gathered;
   return (
-    <AppLayout>
+    <AppLayout householdHeader={householdControls}>
       <Paper
         component="section"
         variant="outlined"
@@ -131,7 +142,6 @@ export function App({
         aria-labelledby="quest-heading"
         aria-busy={loading || !!busy}
       >
-        {householdControls}
         <div className="quest-header">
           <div>
             <h2 id="quest-heading">The Quest Log</h2>
@@ -275,7 +285,11 @@ export function App({
                                 `Clear all ${gathered} purchased items?`,
                               )
                             )
-                              void act("clear", () => repository!.clear());
+                              void act(
+                                "clear",
+                                () => repository!.clear(),
+                                "clearPurchased",
+                              );
                           }}
                         >
                           Clear gathered
@@ -289,17 +303,30 @@ export function App({
                           item={item}
                           busy={!!busy}
                           save={(value) =>
-                            act(item.id, () =>
-                              repository!.update(item.id, value),
+                            act(
+                              item.id,
+                              () => repository!.update(item.id, value),
+                              "itemEdited",
                             )
                           }
                           toggle={() =>
-                            void act(item.id, () =>
-                              repository!.toggle(item.id, !item.is_purchased),
+                            void act(
+                              item.id,
+                              () =>
+                                repository!.toggle(item.id, !item.is_purchased),
+                              item.is_purchased
+                                ? "itemUnchecked"
+                                : remaining === 1
+                                  ? "shoppingCompleted"
+                                  : "itemPurchased",
                             )
                           }
                           remove={() =>
-                            void act(item.id, () => repository!.remove(item.id))
+                            void act(
+                              item.id,
+                              () => repository!.remove(item.id),
+                              items.length === 1 ? "emptyList" : "itemDeleted",
+                            )
                           }
                         />
                       ))}
@@ -321,9 +348,7 @@ export function App({
           </>
         )}
       </Paper>
-      <p className="household-note">
-        For the household. For the second breakfast.
-      </p>
+      {!loading && !loadError && !error && <RealmWhisper quote={quote} />}
     </AppLayout>
   );
 }

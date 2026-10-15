@@ -1,5 +1,6 @@
 ﻿import { useEffect, useRef, useState } from "react";
 import Alert from "@mui/material/Alert";
+import { LogOut } from "lucide-react";
 import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";
 import Paper from "@mui/material/Paper";
@@ -241,6 +242,7 @@ export function HouseholdApp() {
       }
       setSession(null);
       setChoosing(true);
+      setMode("signin");
       setNotice("");
       setPassword("");
       setConfirmation("");
@@ -270,26 +272,32 @@ export function HouseholdApp() {
         repository={session.repository}
         householdControls={
           <div className="household-controls">
-            <div className="household-toolbar">
+            <div className="household-header-row">
               <div className="household-identity">
                 <span className="household-name">{session.household.name}</span>
-                <span className="household-id">{session.household.slug}</span>
               </div>
-              <Button
-                variant="outlined"
-                ref={inviteTrigger}
-                aria-controls={
-                  showInvite ? "household-invite-panel" : undefined
-                }
-                aria-expanded={showInvite}
-                onClick={() => setShowInvite(!showInvite)}
-              >
-                Invite members
-              </Button>
-              <Button onClick={chooseHousehold}>Switch household</Button>
-              <Button disabled={pending} onClick={() => void signOut()}>
-                Sign out
-              </Button>
+              <div className="household-header-actions">
+                <Button
+                  variant="outlined"
+                  ref={inviteTrigger}
+                  aria-controls={
+                    showInvite ? "household-invite-panel" : undefined
+                  }
+                  aria-expanded={showInvite}
+                  onClick={() => setShowInvite(!showInvite)}
+                >
+                  Invite members
+                </Button>
+                <Button
+                  className="household-signout"
+                  aria-label="Sign out"
+                  disabled={pending}
+                  onClick={() => void signOut()}
+                >
+                  <LogOut size={17} strokeWidth={1.6} aria-hidden="true" />
+                  <span className="household-signout-label">Sign out</span>
+                </Button>
+              </div>
             </div>
             {showInvite && (
               <HouseholdInvite

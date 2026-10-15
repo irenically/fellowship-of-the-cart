@@ -3,7 +3,7 @@
   color-scheme: only light;
   font-family: "DM Sans", system-ui, sans-serif;
   color: #263e32;
-  background: #f5f3eb;
+  background: #fdf5e3;
   font-synthesis: none;
   --green: #264b3b;
   --muted: #647164;
@@ -25,7 +25,7 @@ body {
   background: #dae4c8;
 }
 html {
-  scrollbar-color: #8a9c7c #f5f3eb;
+  scrollbar-color: #8a9c7c #fdf5e3;
 }
 #root {
   min-height: 100vh;
@@ -45,10 +45,10 @@ body::before {
   background-image:
     linear-gradient(
       to bottom,
-      rgba(245, 243, 235, 0.3) 0%,
-      rgba(245, 243, 235, 0.12) 45%,
-      rgba(245, 243, 235, 0.6) 75%,
-      #f5f3eb 100%
+      rgba(253, 245, 227, 0.3) 0%,
+      rgba(253, 245, 227, 0.12) 45%,
+      rgba(253, 245, 227, 0.6) 75%,
+      #fdf5e3 100%
     ),
     url("/assets/Misty Fantasy Valley with Castle Ruins.png");
   background-size: cover;
@@ -155,10 +155,46 @@ h2 {
   min-width: 190px;
   font-variant-numeric: tabular-nums;
 }
-.household-controls {
+.household-page-header {
+  background: #fdf5e3;
   border-bottom: 1px solid #dedfd3;
-  padding-bottom: 12px;
-  margin-bottom: 16px;
+}
+.household-header-inner {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 8px max(20px, env(safe-area-inset-right, 0px)) 8px
+    max(20px, env(safe-area-inset-left, 0px));
+}
+.household-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.household-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.household-signout.MuiButton-root {
+  gap: 6px;
+}
+@media (max-width: 600px) {
+  .household-header-row {
+    gap: 8px;
+  }
+  .household-header-actions {
+    gap: 4px;
+  }
+  .household-signout-label {
+    display: none;
+  }
+  .household-signout.MuiButton-root {
+    min-width: 44px;
+    padding: 8px;
+  }
 }
 .household-toolbar {
   display: flex;
@@ -167,25 +203,21 @@ h2 {
   gap: 4px 8px;
 }
 .household-name {
+  font-family: Lora, Georgia, serif;
+  font-size: 18px;
   flex: 1 1 140px;
   min-width: 0;
-  font-weight: 600;
+  font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .household-identity {
-  flex: 1 1 160px;
+  flex: 1 1 0;
   min-width: 0;
 }
 .household-identity .household-name {
   display: block;
-}
-.household-id {
-  display: block;
-  color: var(--muted);
-  font-size: 13px;
-  overflow-wrap: anywhere;
 }
 .household-auth-form {
   display: flex;
@@ -307,6 +339,50 @@ h2 {
   color: var(--muted);
   font-size: 13px;
   margin: 0 0 12px;
+}
+.realm-whisper {
+  box-sizing: border-box;
+  max-width: 960px;
+  min-height: 88px;
+  margin: 16px auto 24px;
+  padding: 14px 20px;
+  border: 1px solid #ded2b4;
+  border-radius: 8px;
+  background: #f1ecdd;
+  text-align: center;
+}
+.realm-whisper-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #806629;
+  font-size: 10px;
+  line-height: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.realm-whisper-label img {
+  flex-shrink: 0;
+  object-fit: contain;
+}
+.realm-whisper-label img:last-child {
+  transform: scaleX(-1);
+}
+.realm-whisper blockquote {
+  max-width: 70ch;
+  margin: 10px auto 0;
+  color: #4c6045;
+  font-size: 13px;
+  line-height: 1.7;
+  font-style: italic;
+  text-wrap: pretty;
+}
+@media (max-width: 480px) {
+  .realm-whisper {
+    min-height: 132px;
+    padding-inline: 16px;
+  }
 }
 .add-form {
   display: flex;
@@ -611,12 +687,6 @@ ul {
   color: var(--green);
   font-size: 14px;
   margin: 12px 0 0;
-}
-.household-note {
-  text-align: center;
-  font-size: 11px;
-  color: #606d59;
-  margin: 12px 0;
 }
 .page-footer {
   margin-top: auto;

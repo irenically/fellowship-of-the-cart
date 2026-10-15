@@ -1,0 +1,234 @@
+
+{
+  "wisdom": [
+    "One does not simply walk into Lidl without a list. And yet, here we are.",
+    "Not all who wander are lost. Some have been circling the dairy aisle for twenty minutes.",
+    "The road goes ever on and on. Much like the grocery bill.",
+    "A wizard is never late. Dinner, on the other hand, is a different story.",
+    "You have my sword. And my bow. And my slightly damp reusable shopping bag.",
+    "The fellowship stands united. Except on the matter of how much cheese is enough.",
+    "There is no greater darkness than opening the fridge for the fifth time and finding nothing new.",
+    "Even the smallest snack can change the course of history. Particularly at midnight.",
+    "Second breakfast is not a luxury. It is a fundamental right.",
+    "Great adventures begin with a single step. Ours began because someone ate the last biscuit.",
+    "A full cart is a heavy burden. A full receipt is heavier still.",
+    "Some treasures are gold. Others have a yellow discount sticker.",
+    "The journey of a thousand aisles begins with forgetting why you came.",
+    "The wise plan their purchases. We have chosen a more adventurous approach.",
+    "Courage is knowing the price of olive oil and putting it in the cart anyway.",
+    "The pantry remembers nothing. That's rather the problem.",
+    "The council has spoken. Unfortunately, the council was hungry at the time.",
+    "Great adventures require great provisions. And a loyalty card nobody can find.",
+    "The road to dinner is paved with forgotten ingredients and increasingly desperate substitutions.",
+    "One list. Two adventurers. Three entirely unnecessary purchases.",
+    "A great evil stirs in the kitchen. It is the smell of something forgotten in the fridge.",
+    "There are older and fouler things than orcs in the depths of the vegetable drawer.",
+    "The fate of dinner hangs by a thread. That thread is a single egg.",
+    "Much that once was is lost. Including the receipt.",
+    "The fellowship was formed to defeat hunger. Hunger remains undefeated.",
+    "All we have to decide is what to do with the groceries we've been given. Preferably before they expire.",
+    "The greatest test of courage is entering a supermarket while hungry.",
+    "A wise adventurer never trusts a shopping cart with one suspicious wheel.",
+    "The ancient prophecies spoke of a great feast. They neglected to mention the dishes.",
+    "A true hero knows when to retreat. Especially from the self-checkout machine."
+  ],
+  "itemAdded": [
+    "Another burden for the fellowship. The bags were already full.",
+    "The council has deemed this essential. The council offers no explanation.",
+    "And so the quest grows. As does the financial concern.",
+    "A noble addition. We shall pretend it was planned.",
+    "The list grows. Somewhere, a coin purse weeps.",
+    "The fellowship accepts this burden. Reluctantly.",
+    "Another item. The wagon makes a concerning noise.",
+    "An excellent choice, according to absolutely no one consulted.",
+    "The pantry demands tribute. Again. Greedy little cupboard.",
+    "One more step toward bankruptcy. But a delicious one.",
+    "The scribes have recorded your wishes. Their eyebrows are raised.",
+    "Another treasure to seek. The shopkeeper must think us obsessed.",
+    "The quest was almost manageable. You have corrected this.",
+    "The council approves. The treasury has filed a complaint.",
+    "And another! At this rate, we shall need a second donkey.",
+    "The list welcomes its newest victim.",
+    "A bold decision. Made with absolutely no supporting evidence.",
+    "The kingdom shall acquire it. Whether the kingdom needs it is another matter.",
+    "The royal shopping expedition has been extended. Again.",
+    "Somewhere, a cashier senses a disturbance."
+  ],
+  "itemPurchased": [
+    "A small victory for the realm. Very small. Almost embarrassing.",
+    "Another quest fulfilled. The bards remain unimpressed.",
+    "The fellowship grows stronger. The wallet grows weaker.",
+    "One step closer to second breakfast. Or first dinner.",
+    "The provisions are secured. Guard them with your life. Or a shopping bag.",
+    "A glorious triumph! Over an object sitting on a shelf.",
+    "The realm shall not go hungry tonight. Probably.",
+    "Another burden lifted. Now physically carried.",
+    "The pantry rejoices. The fridge remains suspiciously quiet.",
+    "The deed is done. The receipt shall bear witness.",
+    "One fewer obstacle between us and dinner. Only seventeen remain.",
+    "A victory worthy of a very short song.",
+    "The bards shall sing of this day. Quietly, so as not to disturb the other shoppers.",
+    "Against all odds, you found it exactly where it was supposed to be.",
+    "The prophecy has been fulfilled. Nobody is particularly surprised.",
+    "The item has been captured. Do not let it escape at checkout.",
+    "A heroic deed. The cashier has yet to notice.",
+    "The council applauds. One person clapped.",
+    "Another treasure claimed! Please remember to pay for it.",
+    "The fellowship advances. The trolley continues pulling to the left."
+  ],
+  "itemEdited": [
+    "The ancient records have been amended. The scribes are exhausted.",
+    "The council has reconsidered. The council does this a lot.",
+    "A minor correction to the prophecy. The oracle was having an off day.",
+    "History has been rewritten. The historians are furious.",
+    "The scribes have been notified. One has resigned.",
+    "Even the wisest make grocery mistakes. Some of us make them professionally.",
+    "The prophecy was slightly inaccurate. By approximately three kilograms.",
+    "The fellowship has changed its mind. A shocking development.",
+    "The sacred texts required adjustments. Apparently, nobody proofread them.",
+    "A new decree has replaced the old. Please destroy all previous scrolls.",
+    "The royal records have been updated. The ink was barely dry.",
+    "A correction! The council insists this was always the plan.",
+    "The historians will have a difficult time explaining this one.",
+    "The ancient scroll has been edited. Ancient is a relative term.",
+    "The prophecy now says something else. Convenient.",
+    "The council denies ever requesting the original quantity."
+  ],
+  "itemDeleted": [
+    "And so it was banished from the realm. Its crimes remain classified.",
+    "This item shall trouble us no more. Unless someone adds it again.",
+    "The council has spoken. Begone, unnecessary provision!",
+    "A sacrifice had to be made. The budget demanded blood. Figuratively.",
+    "Its journey ends here. It barely had time to unpack.",
+    "We shall speak of this no more. Especially at dinner.",
+    "Gone, but probably back on the list by Thursday.",
+    "The prophecy has been cancelled due to insufficient enthusiasm.",
+    "It was never truly needed. That's our official story.",
+    "Into the void it goes. The void is getting rather crowded.",
+    "A tragic end to a very short and entirely pointless adventure.",
+    "The item has been exiled. No forwarding address was provided.",
+    "The scribes have erased all evidence. You saw nothing.",
+    "The kingdom has decided it can live without this. Brave words.",
+    "Removed from the sacred list. The pantry breathes a sigh of relief.",
+    "Another casualty of the Great Budget Council.",
+    "The item has fallen. We shall remember it for approximately four seconds.",
+    "The fellowship denies all knowledge of this purchase.",
+    "Banished! The council was unusually enthusiastic about that.",
+    "And just like that, an entire quest was abandoned."
+  ],
+  "itemUnchecked": [
+    "The quest continues. Someone celebrated too early.",
+    "Someone has undone our hard work. The council demands names.",
+    "The victory was premature. Please return the tiny victory banner.",
+    "Back to the battlefield. The item has apparently escaped.",
+    "The council demands a recount. And possibly a snack.",
+    "A most unfortunate turn of events. The bards must rewrite the song.",
+    "The fellowship must try again. Morale is at an all-time medium.",
+    "It seems our work here is not done. How deeply inconvenient.",
+    "The treasure has vanished! Check under the shopping bags.",
+    "A false victory! The historians are correcting their notes.",
+    "The item has returned from exile. Nobody invited it.",
+    "The quest has reopened. The paperwork is tremendous.",
+    "The prophecy remains unfulfilled. The oracle is getting impatient.",
+    "We were so close to greatness. Well, reasonably close.",
+    "The council regrets to announce that we are, in fact, not finished."
+  ],
+  "firstItemAdded": [
+    "And so the quest begins. May the wallet forgive us.",
+    "Every great adventure begins with a single item. Usually followed by forty more.",
+    "The fellowship has received its first mission. Nobody volunteered.",
+    "A humble beginning to an unnecessarily expensive expedition.",
+    "The first decree has been issued. The scribes look nervous.",
+    "Our journey begins. May the discounts be plentiful and the queues merciful.",
+    "A quest is born! The kingdom has approximately no idea what comes next.",
+    "One item. One dream. Several opportunities for disaster.",
+    "The council has assembled. This could have been an email.",
+    "The first provision has been requested. The treasury is already concerned.",
+    "A new adventure begins. Please bring the reusable bags this time.",
+    "The fellowship sets forth! Once somebody finds their keys."
+  ],
+  "shoppingCompleted": [
+    {
+      "title": "The fellowship has prevailed!",
+      "subtitle": "Until someone remembers the one thing we actually came for."
+    },
+    {
+      "title": "The quest is complete.",
+      "subtitle": "The pantry shall feast tonight. The wallet shall not."
+    },
+    {
+      "title": "You bow to no one.",
+      "subtitle": "Except perhaps the cashier, who has seen things."
+    },
+    {
+      "title": "Victory at last!",
+      "subtitle": "May your bags be strong, your eggs unbroken, and your receipt merciful."
+    },
+    {
+      "title": "The realm is saved.",
+      "subtitle": "For approximately three business days."
+    },
+    {
+      "title": "All provisions gathered.",
+      "subtitle": "Now comes the true challenge: carrying everything in one trip."
+    },
+    {
+      "title": "A glorious victory!",
+      "subtitle": "The coin purse gave its life so that dinner might live."
+    },
+    {
+      "title": "The fellowship triumphs!",
+      "subtitle": "Songs shall be sung. Receipts shall be quietly hidden."
+    },
+    {
+      "title": "The quest is over!",
+      "subtitle": "The bards are composing a ballad. It is mostly about cheese."
+    },
+    {
+      "title": "The kingdom rejoices!",
+      "subtitle": "Nobody tell the kingdom how much we spent."
+    },
+    {
+      "title": "A legendary achievement!",
+      "subtitle": "Historians agree this was definitely a shopping trip."
+    },
+    {
+      "title": "The final item has fallen!",
+      "subtitle": "We came. We saw. We forgot the reusable bags."
+    }
+  ],
+  "emptyList": [
+    "A suspicious peace has settled over the pantry. Nobody trusts it.",
+    "The quest log is empty. The fridge tells a different story.",
+    "Nothing to acquire. The council finds this deeply suspicious.",
+    "The fellowship rests. The fellowship has clearly forgotten something.",
+    "No quests remain. Enjoy these seventeen seconds of peace.",
+    "The shelves are full. This claim has not been independently verified.",
+    "All is quiet in the realm. Far too quiet. Check the milk.",
+    "There is nothing on the list. We have almost certainly made a mistake.",
+    "The council has no demands. Someone check if the council is awake.",
+    "A rare moment of domestic harmony. Historians are baffled.",
+    "The scribes await your next questionable decision. They have cleared their schedules.",
+    "An empty list? The oracle suspects foul play.",
+    "The pantry stands silent. It knows what it did.",
+    "No provisions requested. A bold strategy for a household that eats.",
+    "The realm appears fully supplied. We give it until breakfast.",
+    "Not a single item. Has someone been shopping in secret?",
+    "The quest log is empty. This is either excellent planning or complete negligence.",
+    "The council has declared the pantry sufficient. The pantry was not consulted."
+  ],
+  "clearPurchased": [
+    "History shall remember none of this. Especially the receipt.",
+    "The records have been cleansed. The scribes have conveniently forgotten everything.",
+    "The completed quests fade into legend. And the recycling bin.",
+    "The scribes have cleared the archives. Please do not ask them to retrieve anything.",
+    "A fresh chapter begins. The treasury begs for a day off.",
+    "Yesterday's victories are today's forgotten receipts.",
+    "The great shopping expedition has been erased from history. The bank statement disagrees.",
+    "The council has ordered the archives burned. Metaphorically, of course.",
+    "The deeds are forgotten. The groceries remain. Hopefully.",
+    "The scribes have wiped the slate clean. Their hands are covered in ink.",
+    "All evidence of our heroic shopping has vanished. Except the empty wallet.",
+    "A new scroll awaits. The old one was becoming embarrassingly long."
+  ]
+}

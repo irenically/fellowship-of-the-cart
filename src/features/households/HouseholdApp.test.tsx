@@ -159,7 +159,7 @@ async function passwordFields(user: ReturnType<typeof userEvent.setup>) {
     "fixture-password",
   );
 }
-it("suggests an editable ID, creates a household, and switches without stale items", async () => {
+it("suggests an editable ID, creates a household, and signs into another after signing out without stale items", async () => {
   const repoA = isolatedRepository(),
     repoB = isolatedRepository();
   await repoB.add({ name: "Bananas", quantity: 2, unit: "piece" });
@@ -191,7 +191,8 @@ it("suggests an editable ID, creates a household, and switches without stale ite
   await user.click(screen.getByRole("button", { name: "Invite members" }));
   await user.click(screen.getByRole("button", { name: "Copy household ID" }));
   expect(screen.getByText(/Household ID copied/)).toBeTruthy();
-  await user.click(screen.getByRole("button", { name: "Switch household" }));
+  await user.click(screen.getByRole("button", { name: "Sign out" }));
+  await screen.findByRole("button", { name: "Sign in" });
   await user.type(
     screen.getByRole("textbox", { name: /Household ID/ }),
     homeB.slug,

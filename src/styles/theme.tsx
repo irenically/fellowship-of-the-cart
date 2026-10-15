@@ -12,7 +12,7 @@ export const theme = createTheme({
       contrastText: "#ffffff",
     },
     secondary: { main: "#a18136" },
-    background: { default: "#f5f3eb", paper: "#fffdf7" },
+    background: { default: "#fdf5e3", paper: "#fffdf7" },
     text: { primary: "#263e32", secondary: "#647164" },
     error: { main: "#a12d23" },
     divider: "#dedfd3",
