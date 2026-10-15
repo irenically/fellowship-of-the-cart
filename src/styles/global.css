@@ -329,29 +329,50 @@ ul {
   border-bottom: 1px solid #eeeee5;
   min-width: 0;
 }
+.check-target {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  width: 36px;
+  min-height: 44px;
+  cursor: pointer;
+}
 .check {
   appearance: none;
-  flex: 0 0 40px;
-  width: 40px;
-  height: 40px;
-  min-height: 40px;
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
   padding: 0;
   border: 1.5px solid #a7b69f;
-  border-radius: 8px;
+  border-radius: 6px;
+  color: #82967a;
   cursor: pointer;
-  margin: 2px 0;
+  margin: 0;
 }
 .check:checked {
   background: var(--green);
   border-color: var(--green);
+  color: #ffffff;
 }
-.check:checked::after {
+.check::after {
   content: "✓";
   display: block;
   text-align: center;
-  color: white;
-  font-size: 20px;
-  line-height: 38px;
+  color: currentColor;
+  font-size: 17px;
+  line-height: 25px;
+}
+@media (hover: hover) {
+  .check-target:hover .check:not(:disabled) {
+    border-color: #507b3f;
+    color: #507b3f;
+    background: #edf3e5;
+  }
+  .check-target:hover .check:checked:not(:disabled) {
+    background: #3f7045;
+    border-color: #6c9654;
+    color: #ffffff;
+  }
 }
 .item-title {
   background: none;
@@ -656,10 +677,10 @@ ul {
     margin-left: 0;
   }
   .item-title {
-    flex-basis: calc(100% - 52px);
+    flex-basis: calc(100% - 44px);
   }
   .item-quantity {
-    margin-left: 46px;
+    margin-left: 42px;
   }
   .row-actions {
     margin-left: auto;

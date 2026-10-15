@@ -54,6 +54,7 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
   }
   return (
     <li className={`item ${item.is_purchased ? "purchased" : ""}`}>
+      <label className="check-target">
       <input
         className="check"
         type="checkbox"
@@ -62,6 +63,7 @@ export function ItemRow({ item, busy, save, toggle, remove }: Props) {
         disabled={busy || editing}
         onChange={toggle}
       />
+      </label>
       {editing ? (
         <form
           className="editor"
